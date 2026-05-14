@@ -5,117 +5,449 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>TextPro 正则工具箱 · 专业文本净化 · 安全增强版</title>
     <style>
-        * { box-sizing: border-box; }
+        * {
+            box-sizing: border-box;
+        }
         body {
             background: #eef2f7;
             font-family: 'Segoe UI', 'Inter', system-ui, 'Consolas', monospace;
-            margin: 0; padding: 24px 20px;
+            margin: 0;
+            padding: 24px 20px;
         }
-        .app-container { max-width: 1600px; margin: 0 auto; }
+        .app-container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
         .card {
-            background: #ffffff; border-radius: 28px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.05); margin-bottom: 24px;
-            overflow: hidden; border: 1px solid #e9edf2;
+            background: #ffffff;
+            border-radius: 28px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            margin-bottom: 24px;
+            overflow: hidden;
+            border: 1px solid #e9edf2;
         }
         .card-header {
-            padding: 1rem 1.8rem; background: #f8fafd;
-            border-bottom: 1px solid #e9edf2; font-weight: 600; font-size: 1.1rem;
-            display: flex; align-items: center; flex-wrap: wrap; gap: 12px;
+            padding: 1rem 1.8rem;
+            background: #f8fafd;
+            border-bottom: 1px solid #e9edf2;
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
             justify-content: space-between;
         }
-        .card-body { padding: 1.5rem 1.8rem; }
-        .two-columns { display: flex; gap: 24px; flex-wrap: wrap; }
-        .two-columns > div { flex: 1; min-width: 280px; }
+        .card-body {
+            padding: 1.5rem 1.8rem;
+        }
+        .two-columns {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+        .two-columns > div {
+            flex: 1;
+            min-width: 280px;
+        }
         textarea {
-            width: 100%; font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
-            font-size: 13px; line-height: 1.5; border: 1px solid #cbdde9;
-            border-radius: 20px; padding: 14px 18px; background: #fff; resize: vertical;
+            width: 100%;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            border: 1px solid #cbdde9;
+            border-radius: 20px;
+            padding: 14px 18px;
+            background: #fff;
+            resize: vertical;
         }
-        textarea:focus, input:focus {
-            outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+        textarea:focus,
+        input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
         }
-        #sourceText { min-height: 320px; }
-        #resultText { min-height: 320px; background: #fefcf5; }
+        #sourceText {
+            min-height: 320px;
+        }
+        #resultText {
+            min-height: 320px;
+            background: #fefcf5;
+        }
 
         .search-bar {
-            display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
-            margin-top: 10px; padding: 8px 14px; background: #f7f9fc;
-            border-radius: 16px; border: 1px solid #e2e8f0;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            padding: 8px 14px;
+            background: #f7f9fc;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
         }
         .search-bar input[type="text"] {
-            flex: 1; min-width: 140px; padding: 7px 14px; border-radius: 60px;
-            border: 1px solid #cbdde9; background: #fff; font-size: 0.85rem;
-            font-family: inherit; transition: 0.2s;
+            flex: 1;
+            min-width: 140px;
+            padding: 7px 14px;
+            border-radius: 60px;
+            border: 1px solid #cbdde9;
+            background: #fff;
+            font-size: 0.85rem;
+            font-family: inherit;
+            transition: 0.2s;
         }
         .search-case-label {
-            display: inline-flex; align-items: center; gap: 4px; font-size: 0.75rem;
-            font-weight: 500; color: #475569; cursor: pointer; white-space: nowrap; user-select: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #475569;
+            cursor: pointer;
+            white-space: nowrap;
+            user-select: none;
         }
         .search-count {
-            font-size: 0.75rem; font-weight: 600; color: #475569; background: #e6f0f9;
-            padding: 4px 10px; border-radius: 60px; white-space: nowrap; min-width: 42px;
-            text-align: center; transition: 0.2s;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #475569;
+            background: #e6f0f9;
+            padding: 4px 10px;
+            border-radius: 60px;
+            white-space: nowrap;
+            min-width: 42px;
+            text-align: center;
+            transition: 0.2s;
         }
-        .search-count.no-match { background: #ffeaea; color: #b91c1c; }
-        .search-count.has-match { background: #e6f4ea; color: #166534; }
+        .search-count.no-match {
+            background: #ffeaea;
+            color: #b91c1c;
+        }
+        .search-count.has-match {
+            background: #e6f4ea;
+            color: #166534;
+        }
         .search-bar .icon-btn {
-            flex-shrink: 0; background: #f0f2f5; border: 1px solid #cbd5e1;
-            border-radius: 20px; padding: 5px 10px; cursor: pointer; font-size: 12px;
-            transition: all 0.2s; display: inline-flex; align-items: center; gap: 2px;
-            font-weight: 500; white-space: nowrap;
+            flex-shrink: 0;
+            background: #f0f2f5;
+            border: 1px solid #cbd5e1;
+            border-radius: 20px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            font-weight: 500;
+            white-space: nowrap;
         }
-        .search-bar .icon-btn:hover { background: #e2e8f0; border-color: #94a3b8; }
-        .search-bar .icon-btn.nav-btn { background: #e6f4ff; border-color: #91caff; color: #0050b3; }
-        .search-bar .icon-btn.nav-btn:hover { background: #bae0ff; border-color: #4096ff; }
-        .search-bar .icon-btn.clear-btn { background: #fff2f0; border-color: #ffbbb3; color: #c73c21; font-weight: 700; }
-        .search-bar .icon-btn.clear-btn:hover { background: #ffe7e5; border-color: #ff7a5c; }
+        .search-bar .icon-btn:hover {
+            background: #e2e8f0;
+            border-color: #94a3b8;
+        }
+        .search-bar .icon-btn.nav-btn {
+            background: #e6f4ff;
+            border-color: #91caff;
+            color: #0050b3;
+        }
+        .search-bar .icon-btn.nav-btn:hover {
+            background: #bae0ff;
+            border-color: #4096ff;
+        }
+        .search-bar .icon-btn.clear-btn {
+            background: #fff2f0;
+            border-color: #ffbbb3;
+            color: #c73c21;
+            font-weight: 700;
+        }
+        .search-bar .icon-btn.clear-btn:hover {
+            background: #ffe7e5;
+            border-color: #ff7a5c;
+        }
 
-        .regex-bar { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 20px; align-items: flex-end; }
-        .regex-field { flex: 2; }
-        .replacement-field { flex: 1.5; }
+        .regex-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 20px;
+            align-items: flex-end;
+        }
+        .regex-field {
+            flex: 2;
+        }
+        .replacement-field {
+            flex: 1.5;
+        }
         .flag-group {
-            display: flex; gap: 12px; background: #f1f5f9; padding: 8px 18px;
-            border-radius: 48px; align-items: center; flex-wrap: wrap;
+            display: flex;
+            gap: 12px;
+            background: #f1f5f9;
+            padding: 8px 18px;
+            border-radius: 48px;
+            align-items: center;
+            flex-wrap: wrap;
         }
-        .flag-group label { display: inline-flex; align-items: center; gap: 6px; font-weight: 500; cursor: pointer; }
+        .flag-group label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 500;
+            cursor: pointer;
+        }
         button {
-            background: #1f5e7e; border: none; color: white; font-weight: 500;
-            padding: 8px 22px; border-radius: 44px; font-size: 0.85rem; cursor: pointer;
-            transition: 0.2s; display: inline-flex; align-items: center; gap: 6px;
+            background: #1f5e7e;
+            border: none;
+            color: white;
+            font-weight: 500;
+            padding: 8px 22px;
+            border-radius: 44px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
-        button.primary { background: #0f6b8c; box-shadow: 0 2px 5px rgba(15,107,140,0.3); }
-        button.primary:hover { background: #0a516d; }
-        button.outline { background: transparent; border: 1px solid #b9cfdf; color: #1f5e7e; }
-        button.outline:hover { background: #eaf3fc; }
-        .preset-row { margin-top: 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
-        select, input { padding: 8px 14px; border-radius: 60px; border: 1px solid #cbdde9; background: white; font-size: 0.85rem; }
+        button.primary {
+            background: #0f6b8c;
+            box-shadow: 0 2px 5px rgba(15, 107, 140, 0.3);
+        }
+        button.primary:hover {
+            background: #0a516d;
+        }
+        button.outline {
+            background: transparent;
+            border: 1px solid #b9cfdf;
+            color: #1f5e7e;
+        }
+        button.outline:hover {
+            background: #eaf3fc;
+        }
+        .preset-row {
+            margin-top: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px;
+        }
+        select,
+        input {
+            padding: 8px 14px;
+            border-radius: 60px;
+            border: 1px solid #cbdde9;
+            background: white;
+            font-size: 0.85rem;
+        }
         .info-bar {
-            background: #eef2fa; border-radius: 18px; padding: 10px 18px; font-size: 0.8rem;
-            margin-top: 16px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+            background: #eef2fa;
+            border-radius: 18px;
+            padding: 10px 18px;
+            font-size: 0.8rem;
+            margin-top: 16px;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
         }
-        .badge { background: #e6f0f9; padding: 4px 12px; border-radius: 60px; font-size: 0.7rem; }
-        .rule-table { width: 100%; border-collapse: collapse; background: white; font-size: 12px; border: 1px solid #d4dce6; border-radius: 12px; overflow: hidden; }
-        .rule-table th, .rule-table td { border: 1px solid #e0e6ef; padding: 8px 6px; vertical-align: middle; }
-        .rule-table th { background: #f2f6fb; font-weight: 600; font-size: 12px; }
-        .rule-table input[type="text"] { width: 100%; font-family: monospace; font-size: 12px; padding: 6px 8px; border-radius: 12px; border: 1px solid #cbdde9; }
-        .rule-check { text-align: center; width: 45px; }
-        .action-buttons { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; }
-        .icon-btn { background: #f0f2f5; border: 1px solid #cbd5e1; border-radius: 20px; padding: 4px 8px; cursor: pointer; font-size: 11px; transition: all 0.2s; display: inline-flex; align-items: center; gap: 2px; font-weight: 500; }
-        .icon-btn.move-up, .icon-btn.move-down { background: #e6f4ff; border-color: #91caff; color: #0050b3; }
-        .icon-btn.move-up:hover, .icon-btn.move-down:hover { background: #bae0ff; border-color: #4096ff; }
-        .icon-btn.delete { background: #fff2f0; border-color: #ffbbb3; color: #c73c21; }
-        .icon-btn.delete:hover { background: #ffe7e5; border-color: #ff7a5c; }
-        .icon-btn.top-btn, .icon-btn.bottom-btn { background: #e9f0fa; border-color: #bdd3f0; color: #1e4a76; }
-        .icon-btn.top-btn:hover, .icon-btn.bottom-btn:hover { background: #cddff5; }
-        .scrollable-table { max-height: 450px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 16px; }
-        .table-toolbar { display: flex; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
-        .js-badge { background: #e9d4ff; color: #6b21a5; border-radius: 12px; padding: 2px 6px; font-size: 10px; margin-left: 4px; }
-        .warning-badge { background: #fff3e0; color: #b45f06; border-radius: 12px; padding: 2px 8px; font-size: 10px; margin-left: 8px; cursor: help; }
+        .badge {
+            background: #e6f0f9;
+            padding: 4px 12px;
+            border-radius: 60px;
+            font-size: 0.7rem;
+        }
+        .rule-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            font-size: 12px;
+            border: 1px solid #d4dce6;
+            border-radius: 12px;
+            overflow: hidden;
+            table-layout: fixed;
+        }
+        .rule-table th,
+        .rule-table td {
+            border: 1px solid #e0e6ef;
+            padding: 8px 6px;
+            vertical-align: middle;
+        }
+        .rule-table th {
+            background: #f2f6fb;
+            font-weight: 600;
+            font-size: 12px;
+        }
+        /* 优化列宽，保证操作栏按钮在一行 */
+        .rule-table th:nth-child(1) {
+            width: 48px;
+        }   /* 运行 */
+        .rule-table th:nth-child(2) {
+            width: 48px;
+        }   /* 正则 */
+        .rule-table th:nth-child(3) {
+            width: 58px;
+        }   /* JS模式 */
+        .rule-table th:nth-child(4) {
+            width: 50px;
+        }   /* 序号 */
+        .rule-table th:nth-child(5) {
+            width: 16%;
+            min-width: 130px;
+        }   /* 规则名称 */
+        .rule-table th:nth-child(6) {
+            width: 28%;
+            min-width: 200px;
+        }   /* 正则表达式 */
+        .rule-table th:nth-child(7) {
+            width: 26%;
+            min-width: 180px;
+        }   /* 替换文本 */
+        .rule-table th:nth-child(8) {
+            width: 180px;
+        }   /* 操作栏：加宽并允许按钮不换行 */
+
+        /* 规则名称、正则、替换文本所在单元格：让输入框水平居中（保持原大小） */
+        .rule-table td:nth-child(5),
+        .rule-table td:nth-child(6),
+        .rule-table td:nth-child(7) {
+            text-align: center;
+        }
+        .rule-table td:nth-child(5) input,
+        .rule-table td:nth-child(6) input,
+        .rule-table td:nth-child(7) input {
+            display: inline-block;
+            width: 96%;
+            margin: 0 auto;
+            font-family: monospace;
+            font-size: 12px;
+            padding: 6px 8px;
+            border-radius: 12px;
+            border: 1px solid #cbdde9;
+            box-sizing: border-box;
+            text-align: left;
+        }
+        /* 操作栏单元格内部按钮组强制一行显示，且整体向左移动（取消居中，改为靠左） */
+        .rule-table td:nth-child(8) {
+            text-align: left;
+            padding: 6px 4px;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+            flex-wrap: nowrap;
+            justify-content: flex-start;
+            align-items: center;
+        }
+        .rule-check {
+            text-align: center;
+            width: 45px;
+        }
+        .icon-btn {
+            background: #f0f2f5;
+            border: 1px solid #cbd5e1;
+            border-radius: 20px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        .icon-btn.move-up,
+        .icon-btn.move-down {
+            background: #e6f4ff;
+            border-color: #91caff;
+            color: #0050b3;
+        }
+        .icon-btn.move-up:hover,
+        .icon-btn.move-down:hover {
+            background: #bae0ff;
+            border-color: #4096ff;
+        }
+        .icon-btn.delete {
+            background: #fff2f0;
+            border-color: #ffbbb3;
+            color: #c73c21;
+        }
+        .icon-btn.delete:hover {
+            background: #ffe7e5;
+            border-color: #ff7a5c;
+        }
+        .icon-btn.top-btn,
+        .icon-btn.bottom-btn {
+            background: #e9f0fa;
+            border-color: #bdd3f0;
+            color: #1e4a76;
+        }
+        .icon-btn.top-btn:hover,
+        .icon-btn.bottom-btn:hover {
+            background: #cddff5;
+        }
+        .scrollable-table {
+            max-height: 450px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            overflow-x: auto;
+        }
+        .table-toolbar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .js-badge {
+            background: #e9d4ff;
+            color: #6b21a5;
+            border-radius: 12px;
+            padding: 2px 6px;
+            font-size: 10px;
+            margin-left: 4px;
+        }
+        .warning-badge {
+            background: #fff3e0;
+            color: #b45f06;
+            border-radius: 12px;
+            padding: 2px 8px;
+            font-size: 10px;
+            margin-left: 8px;
+            cursor: help;
+        }
+
         @media (max-width: 780px) {
-            .card-body { padding: 1rem; }
-            .rule-table th, .rule-table td { padding: 4px; }
-            .search-bar { gap: 5px; padding: 6px 10px; }
-            .action-buttons .icon-btn { padding: 3px 6px; font-size: 10px; }
+            .card-body {
+                padding: 1rem;
+            }
+            .rule-table th,
+            .rule-table td {
+                padding: 4px;
+            }
+            .search-bar {
+                gap: 5px;
+                padding: 6px 10px;
+            }
+            .action-buttons {
+                gap: 3px;
+            }
+            .icon-btn {
+                padding: 3px 6px;
+                font-size: 10px;
+            }
+            .rule-table th:nth-child(8) {
+                width: 150px;
+            }
+            .rule-table td:nth-child(5) input,
+            .rule-table td:nth-child(6) input,
+            .rule-table td:nth-child(7) input {
+                width: 94%;
+                font-size: 11px;
+                padding: 4px 4px;
+            }
         }
     </style>
 </head>
@@ -233,7 +565,7 @@
             <div class="scrollable-table">
                 <table class="rule-table" id="customRuleTable">
                     <thead>
-                        <tr><th style="width:40px">运行</th><th style="width:50px">正则</th><th style="width:55px">JS模式</th><th style="width:45px">序号</th><th>规则名称</th><th>正则表达式 (Pattern)</th><th>替换文本 (Replacement)</th><th style="width:160px">操作</th></tr>
+                        <tr><th>运行</th><th>正则</th><th>JS模式</th><th>序号</th><th>规则名称</th><th>正则表达式 (Pattern)</th><th>替换文本 (Replacement)</th><th>操作</th></tr>
                     </thead>
                     <tbody id="customRuleTbody"></tbody>
                 </table>
@@ -439,9 +771,9 @@
             const tdRegex = document.createElement('td'); tdRegex.className = 'rule-check'; const regexChk = document.createElement('input'); regexChk.type = 'checkbox'; regexChk.checked = rule.isRegex; regexChk.addEventListener('change', e => { rule.isRegex = e.target.checked; saveCustomRulesToLocal(); }); tdRegex.appendChild(regexChk); tr.appendChild(tdRegex);
             const tdJs = document.createElement('td'); tdJs.className = 'rule-check'; const jsChk = document.createElement('input'); jsChk.type = 'checkbox'; jsChk.checked = !!rule.isJS; jsChk.addEventListener('change', e => { rule.isJS = e.target.checked; saveCustomRulesToLocal(); }); tdJs.appendChild(jsChk); tr.appendChild(tdJs);
             const tdOrder = document.createElement('td'); tdOrder.textContent = rule.order; tr.appendChild(tdOrder);
-            const tdName = document.createElement('td'); const nameInp = document.createElement('input'); nameInp.type = 'text'; nameInp.value = rule.name; nameInp.style.width = '170px'; nameInp.addEventListener('change', e => { rule.name = e.target.value; saveCustomRulesToLocal(); }); tdName.appendChild(nameInp); tr.appendChild(tdName);
-            const tdPat = document.createElement('td'); const patInp = document.createElement('input'); patInp.type = 'text'; patInp.value = rule.pattern; patInp.style.width = '340px'; patInp.style.fontFamily = 'monospace'; patInp.addEventListener('change', e => { rule.pattern = e.target.value; saveCustomRulesToLocal(); }); tdPat.appendChild(patInp); tr.appendChild(tdPat);
-            const tdRep = document.createElement('td'); const repInp = document.createElement('input'); repInp.type = 'text'; repInp.value = rule.replacement; repInp.style.width = '280px'; repInp.addEventListener('change', e => { rule.replacement = e.target.value; saveCustomRulesToLocal(); }); tdRep.appendChild(repInp); tr.appendChild(tdRep);
+            const tdName = document.createElement('td'); const nameInp = document.createElement('input'); nameInp.type = 'text'; nameInp.value = rule.name; nameInp.style.width = '96%'; nameInp.addEventListener('change', e => { rule.name = e.target.value; saveCustomRulesToLocal(); }); tdName.appendChild(nameInp); tr.appendChild(tdName);
+            const tdPat = document.createElement('td'); const patInp = document.createElement('input'); patInp.type = 'text'; patInp.value = rule.pattern; patInp.style.width = '96%'; patInp.style.fontFamily = 'monospace'; patInp.addEventListener('change', e => { rule.pattern = e.target.value; saveCustomRulesToLocal(); }); tdPat.appendChild(patInp); tr.appendChild(tdPat);
+            const tdRep = document.createElement('td'); const repInp = document.createElement('input'); repInp.type = 'text'; repInp.value = rule.replacement; repInp.style.width = '96%'; repInp.addEventListener('change', e => { rule.replacement = e.target.value; saveCustomRulesToLocal(); }); tdRep.appendChild(repInp); tr.appendChild(tdRep);
             const tdAct = document.createElement('td'); tdAct.className = 'action-buttons';
             const upBtn = document.createElement('button'); upBtn.textContent = '↑'; upBtn.className = 'icon-btn move-up'; upBtn.onclick = () => moveRule(rule.order, -1);
             const downBtn = document.createElement('button'); downBtn.textContent = '↓'; downBtn.className = 'icon-btn move-down'; downBtn.onclick = () => moveRule(rule.order, 1);
