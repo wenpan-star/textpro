@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>TextPro 正则工具箱 · 专业文本净化 · 安全增强版</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            background: #eef2f7;
+            font-family: 'Segoe UI', 'Inter', system-ui, 'Consolas', monospace;
+            margin: 0; padding: 24px 20px;
+        }
+        .app-container { max-width: 1600px; margin: 0 auto; }
+        .card {
+            background: #ffffff; border-radius: 28px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05); margin-bottom: 24px;
+            overflow: hidden; border: 1px solid #e9edf2;
+        }
+        .card-header {
+            padding: 1rem 1.8rem; background: #f8fafd;
+            border-bottom: 1px solid #e9edf2; font-weight: 600; font-size: 1.1rem;
+            display: flex; align-items: center; flex-wrap: wrap; gap: 12px;
+            justify-content: space-between;
+        }
+        .card-body { padding: 1.5rem 1.8rem; }
+        .two-columns { display: flex; gap: 24px; flex-wrap: wrap; }
+        .two-columns > div { flex: 1; min-width: 280px; }
+        textarea {
+            width: 100%; font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 13px; line-height: 1.5; border: 1px solid #cbdde9;
+            border-radius: 20px; padding: 14px 18px; background: #fff; resize: vertical;
+        }
+        textarea:focus, input:focus {
+            outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+        }
+        #sourceText { min-height: 320px; }
+        #resultText { min-height: 320px; background: #fefcf5; }
+
+        .search-bar {
+            display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+            margin-top: 10px; padding: 8px 14px; background: #f7f9fc;
+            border-radius: 16px; border: 1px solid #e2e8f0;
+        }
+        .search-bar input[type="text"] {
+            flex: 1; min-width: 140px; padding: 7px 14px; border-radius: 60px;
+            border: 1px solid #cbdde9; background: #fff; font-size: 0.85rem;
+            font-family: inherit; transition: 0.2s;
+        }
+        .search-case-label {
+            display: inline-flex; align-items: center; gap: 4px; font-size: 0.75rem;
+            font-weight: 500; color: #475569; cursor: pointer; white-space: nowrap; user-select: none;
+        }
+        .search-count {
+            font-size: 0.75rem; font-weight: 600; color: #475569; background: #e6f0f9;
+            padding: 4px 10px; border-radius: 60px; white-space: nowrap; min-width: 42px;
+            text-align: center; transition: 0.2s;
+        }
+        .search-count.no-match { background: #ffeaea; color: #b91c1c; }
+        .search-count.has-match { background: #e6f4ea; color: #166534; }
+        .search-bar .icon-btn {
+            flex-shrink: 0; background: #f0f2f5; border: 1px solid #cbd5e1;
+            border-radius: 20px; padding: 5px 10px; cursor: pointer; font-size: 12px;
+            transition: all 0.2s; display: inline-flex; align-items: center; gap: 2px;
+            font-weight: 500; white-space: nowrap;
+        }
+        .search-bar .icon-btn:hover { background: #e2e8f0; border-color: #94a3b8; }
+        .search-bar .icon-btn.nav-btn { background: #e6f4ff; border-color: #91caff; color: #0050b3; }
+        .search-bar .icon-btn.nav-btn:hover { background: #bae0ff; border-color: #4096ff; }
+        .search-bar .icon-btn.clear-btn { background: #fff2f0; border-color: #ffbbb3; color: #c73c21; font-weight: 700; }
+        .search-bar .icon-btn.clear-btn:hover { background: #ffe7e5; border-color: #ff7a5c; }
+
+        .regex-bar { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 20px; align-items: flex-end; }
+        .regex-field { flex: 2; }
+        .replacement-field { flex: 1.5; }
+        .flag-group {
+            display: flex; gap: 12px; background: #f1f5f9; padding: 8px 18px;
+            border-radius: 48px; align-items: center; flex-wrap: wrap;
+        }
+        .flag-group label { display: inline-flex; align-items: center; gap: 6px; font-weight: 500; cursor: pointer; }
+        button {
+            background: #1f5e7e; border: none; color: white; font-weight: 500;
+            padding: 8px 22px; border-radius: 44px; font-size: 0.85rem; cursor: pointer;
+            transition: 0.2s; display: inline-flex; align-items: center; gap: 6px;
+        }
+        button.primary { background: #0f6b8c; box-shadow: 0 2px 5px rgba(15,107,140,0.3); }
+        button.primary:hover { background: #0a516d; }
+        button.outline { background: transparent; border: 1px solid #b9cfdf; color: #1f5e7e; }
+        button.outline:hover { background: #eaf3fc; }
+        .preset-row { margin-top: 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+        select, input { padding: 8px 14px; border-radius: 60px; border: 1px solid #cbdde9; background: white; font-size: 0.85rem; }
+        .info-bar {
+            background: #eef2fa; border-radius: 18px; padding: 10px 18px; font-size: 0.8rem;
+            margin-top: 16px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+        }
+        .badge { background: #e6f0f9; padding: 4px 12px; border-radius: 60px; font-size: 0.7rem; }
+        .rule-table { width: 100%; border-collapse: collapse; background: white; font-size: 12px; border: 1px solid #d4dce6; border-radius: 12px; overflow: hidden; }
+        .rule-table th, .rule-table td { border: 1px solid #e0e6ef; padding: 8px 6px; vertical-align: middle; }
+        .rule-table th { background: #f2f6fb; font-weight: 600; font-size: 12px; }
+        .rule-table input[type="text"] { width: 100%; font-family: monospace; font-size: 11px; padding: 6px 8px; border-radius: 12px; border: 1px solid #cbdde9; }
+        .rule-check { text-align: center; width: 45px; }
+        .action-buttons { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+        .icon-btn { background: #f0f2f5; border: 1px solid #cbd5e1; border-radius: 20px; padding: 4px 8px; cursor: pointer; font-size: 11px; transition: all 0.2s; display: inline-flex; align-items: center; gap: 2px; font-weight: 500; }
+        .icon-btn.move-up, .icon-btn.move-down { background: #e6f4ff; border-color: #91caff; color: #0050b3; }
+        .icon-btn.move-up:hover, .icon-btn.move-down:hover { background: #bae0ff; border-color: #4096ff; }
+        .icon-btn.delete { background: #fff2f0; border-color: #ffbbb3; color: #c73c21; }
+        .icon-btn.delete:hover { background: #ffe7e5; border-color: #ff7a5c; }
+        .scrollable-table { max-height: 400px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 16px; }
+        .table-toolbar { display: flex; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
+        .js-badge { background: #e9d4ff; color: #6b21a5; border-radius: 12px; padding: 2px 6px; font-size: 10px; margin-left: 4px; }
+        .warning-badge { background: #fff3e0; color: #b45f06; border-radius: 12px; padding: 2px 8px; font-size: 10px; margin-left: 8px; cursor: help; }
+        @media (max-width: 780px) {
+            .card-body { padding: 1rem; }
+            .rule-table th, .rule-table td { padding: 4px; }
+            .search-bar { gap: 5px; padding: 6px 10px; }
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <div class="card">
+        <div class="card-header">
+            <span>🧹 TextPro 正则工具箱 · 文本净化/批量替换 <span class="warning-badge" title="JS模式下可执行自定义代码，请仅使用可信规则">⚠️ 安全提醒</span></span>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                <button id="importBtn" class="outline">📂 导入 TXT</button>
+                <button id="exportBtn" class="outline">💾 导出 TXT</button>
+                <button id="clearAllBtn" class="outline">🗑️ 清空所有</button>
+                <button id="statsBtn" class="outline">📊 统计信息</button>
+                <button id="undoBtn" class="outline">↩️ 撤销</button>
+                <button id="redoBtn" class="outline">↪️ 重做</button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="two-columns">
+                <div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <strong>📄 源文本</strong>
+                        <button id="copySourceBtn" class="outline" style="padding: 2px 12px;">复制</button>
+                    </div>
+                    <textarea id="sourceText" placeholder="粘贴或导入文本..."></textarea>
+                </div>
+                <div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <strong>✨ 处理结果</strong>
+                        <button id="copyResultBtn" class="outline" style="padding: 2px 12px;">复制</button>
+                    </div>
+                    <textarea id="resultText" placeholder="运行正则后显示结果..."></textarea>
+                    <div class="search-bar" id="resultSearchBar">
+                        <input type="text" id="resultSearchInput" placeholder="🔍 搜索处理结果..." />
+                        <label class="search-case-label"><input type="checkbox" id="resultSearchCase" /> 区分大小写</label>
+                        <button id="resultSearchPrev" class="icon-btn nav-btn" title="上一个匹配 (Shift+Enter)">▲</button>
+                        <button id="resultSearchNext" class="icon-btn nav-btn" title="下一个匹配 (Enter)">▼</button>
+                        <span class="search-count" id="resultSearchCount">0/0</span>
+                        <button id="resultSearchClear" class="icon-btn clear-btn" title="清除搜索 (Esc)">✕</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <span>⚙️ 正则表达式 / 替换规则</span>
+            <span class="badge">支持捕获组 $1..$n | JS模式独立控制 | 替换框支持 \n \r \t \\ 转义(普通模式)</span>
+        </div>
+        <div class="card-body">
+            <div class="regex-bar">
+                <div class="regex-field">
+                    <label style="font-size:0.7rem;">📐 正则表达式 (Pattern)</label>
+                    <input type="text" id="regexInput" placeholder="例如: ^.*(版主提醒|版主评語).*$" value="">
+                </div>
+                <div class="replacement-field">
+                    <label style="font-size:0.7rem;">✏️ 替换为 (Replacement)</label>
+                    <input type="text" id="replacementInput" placeholder="普通模式支持转义 \n \r \t ; JS模式下为函数体" value="">
+                </div>
+                <div class="flag-group">
+                    <label><input type="checkbox" id="flagG" checked> 全局(g)</label>
+                    <label><input type="checkbox" id="flagI"> 忽略大小写(i)</label>
+                    <label><input type="checkbox" id="flagM"> 多行(m)</label>
+                    <label style="background:#e9d4ff; border-radius:20px; padding:0 8px;"><input type="checkbox" id="topJsMode"> 🧩 JS模式</label>
+                </div>
+                <div><button id="applyRegexBtn" class="primary">▶ 执行替换</button></div>
+            </div>
+            <div class="preset-row">
+                <span>📚 预设规则：</span>
+                <select id="presetSelect">
+                    <option value="">-- 选择预设规则 --</option>
+                    <option value="del_ads">删除常见广告/版主/作者行</option>
+                    <option value="del_ticket">删除括号内【求票/打赏】内容</option>
+                    <option value="del_daixu">删除（待续）以及各类括号待续</option>
+                    <option value="merge_internal">合并段落内换行 (单换行合并)</option>
+                    <option value="compress_empty">压缩多余空行 (多个空行→单个)</option>
+                    <option value="del_blank_lines">删除所有空行</option>
+                    <option value="clean_brackets">移除圆括号/方括号内“待续/求票”</option>
+                </select>
+                <button id="loadPresetBtn">载入此规则</button>
+                <button id="resetToDefaultBtn" class="outline">恢复默认(删广告行)</button>
+                <label style="margin-left: auto;">
+                    <input type="checkbox" id="loopUntilStable"> 🔁 循环执行直到文本稳定
+                </label>
+            </div>
+            <div class="info-bar">
+                <span>💡 提示：</span>
+                <span>• “合并段落内换行” 建议勾选循环执行；JS模式: 函数体接收参数 result (匹配到的完整字符串) 并返回替换内容。</span>
+                <span>• 自定义规则表新增【JS模式】列，独立于正则开关；工作区配置支持保存/导入/导出。</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <span>📋 自定义替换表（顺序批量运行）</span>
+            <span class="badge">支持上移/下移 | 独立正则/JS模式切换 | 可保存工作区配置</span>
+        </div>
+        <div class="card-body">
+            <div class="table-toolbar">
+                <div>
+                    <button id="addRuleBtn" class="outline">➕ 添加规则</button>
+                    <button id="resetDefaultRulesBtn" class="outline">📋 重置默认规则(增强预设集)</button>
+                    <button id="saveSnapshotBtn" class="outline" style="background:#e6f7e6;">💾 保存当前配置快照</button>
+                    <button id="exportFullConfigBtn" class="outline">📤 导出完整配置</button>
+                    <button id="importFullConfigBtn" class="outline">📥 导入完整配置</button>
+                </div>
+                <div>
+                    <button id="batchRunCheckedBtn" class="primary">⚡ 批量运行勾选的规则</button>
+                    <button id="selectAllRulesBtn" class="outline">☑ 全选</button>
+                    <button id="deselectAllRulesBtn" class="outline">☐ 全不选</button>
+                </div>
+            </div>
+            <div class="scrollable-table">
+                <table class="rule-table" id="customRuleTable">
+                    <thead>
+                        <tr><th style="width:40px">运行</th><th style="width:50px">正则</th><th style="width:55px">JS模式</th><th style="width:45px">序号</th><th>规则名称</th><th>正则表达式 (Pattern)</th><th>替换文本 (Replacement)</th><th style="width:120px">操作</th></tr>
+                    </thead>
+                    <tbody id="customRuleTbody"></tbody>
+                </table>
+            </div>
+            <div class="info-bar" style="margin-top: 16px;">
+                <span>✅ 【JS模式】勾选时替换文本作为JavaScript函数体（入参result → 返回替换字符串）。不勾选则普通替换。</span>
+                <span>🔧 “保存当前配置快照”将完整保存顶部正则设置、标志、循环选项以及整个替换表(含勾选状态)，页面自动恢复上次快照。</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    // ======================= DOM 元素引用 =======================
+    const sourceTextarea = document.getElementById('sourceText');
+    const resultTextarea = document.getElementById('resultText');
+    const regexInput = document.getElementById('regexInput');
+    const replacementInput = document.getElementById('replacementInput');
+    const flagG = document.getElementById('flagG');
+    const flagI = document.getElementById('flagI');
+    const flagM = document.getElementById('flagM');
+    const topJsMode = document.getElementById('topJsMode');
+    const loopUntilStable = document.getElementById('loopUntilStable');
+    const applyRegexBtn = document.getElementById('applyRegexBtn');
+    const presetSelect = document.getElementById('presetSelect');
+    const loadPresetBtn = document.getElementById('loadPresetBtn');
+    const resetToDefaultBtn = document.getElementById('resetToDefaultBtn');
+    const importBtn = document.getElementById('importBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    const copySourceBtn = document.getElementById('copySourceBtn');
+    const copyResultBtn = document.getElementById('copyResultBtn');
+    const clearAllBtn = document.getElementById('clearAllBtn');
+    const statsBtn = document.getElementById('statsBtn');
+    const undoBtn = document.getElementById('undoBtn');
+    const redoBtn = document.getElementById('redoBtn');
+    const batchRunCheckedBtn = document.getElementById('batchRunCheckedBtn');
+    const addRuleBtn = document.getElementById('addRuleBtn');
+    const resetDefaultRulesBtn = document.getElementById('resetDefaultRulesBtn');
+    const exportFullConfigBtn = document.getElementById('exportFullConfigBtn');
+    const importFullConfigBtn = document.getElementById('importFullConfigBtn');
+    const saveSnapshotBtn = document.getElementById('saveSnapshotBtn');
+    const selectAllRulesBtn = document.getElementById('selectAllRulesBtn');
+    const deselectAllRulesBtn = document.getElementById('deselectAllRulesBtn');
+    
+    // 搜索相关元素
+    const resultSearchInput = document.getElementById('resultSearchInput');
+    const resultSearchCase = document.getElementById('resultSearchCase');
+    const resultSearchPrev = document.getElementById('resultSearchPrev');
+    const resultSearchNext = document.getElementById('resultSearchNext');
+    const resultSearchCount = document.getElementById('resultSearchCount');
+    const resultSearchClear = document.getElementById('resultSearchClear');
+
+    // ======================= 数据存储 =======================
+    let customRules = [];
+    const STORAGE_KEY_RULES = 'textpro_custom_rules_v3';
+    const STORAGE_SNAPSHOT_KEY = 'textpro_full_workspace_snapshot_v3';
+
+    // ======================= 规则标准化与默认规则集 =======================
+    // 简化后的规则标准化函数（移除冗余的自执行函数处理，仅处理 @js: 前缀）
+    function normalizeRuleFromImport(rule) {
+        const r = { ...rule };
+        r.isRegex = r.isRegex !== false;
+        let rep = String(r.replacement || '');
+        if (rep.trim().startsWith('@js:')) {
+            r.isJS = true;
+            r.replacement = rep.replace(/^@js:\s*/, '').trim();
+        } else {
+            r.isJS = r.isJS === true;
+        }
+        r.enabled = r.enabled !== false;
+        r.runChecked = r.runChecked !== false;
+        if (!r.id) r.id = Date.now() + Math.random() * 10000;
+        return r;
+    }
+
+    // 默认规则集（基于提供的 textpro_custom_rules.json 完美适配）
+    const defaultCustomRulesRaw = [
+        { name: "01-清除版主/广告行", pattern: ".*(版主提醒|版主评語|加长回|欢迎来到|推荐票|阅读文章|您的留言|认真回复|作者：|发表于：|首发：|字数：|待续).*", replacement: "", enabled: true, order: 1, runChecked: true, isRegex: true, isJS: false },
+        { name: "02-删除括号求票语", pattern: "[([{（［｛【][^\\](){}）］｝】]*?(?:求\\w{0,4}[订推藏]|推荐|码字|月票|打赏|待续)[^\\](){}）］｝】]*?[\\]\\}\\)）］｝】]", replacement: "", enabled: true, order: 2, runChecked: true, isRegex: true, isJS: false },
+        { name: "04-合并段落内换行", pattern: "([^ \\t\\n\\r])\\r?\\n([^ \\t\\n\\r])", replacement: "$1$2", enabled: true, order: 3, runChecked: false, isRegex: true, isJS: false },
+        { name: "06-全角字母数字转半角", pattern: "[０-９Ａ-Ｚａ-ｚ]", replacement: "@js: const map={'０':'0','１':'1','２':'2','３':'3','４':'4','５':'5','６':'6','７':'7','８':'8','９':'9','Ａ':'A','Ｂ':'B','Ｃ':'C','Ｄ':'D','Ｅ':'E','Ｆ':'F','Ｇ':'G','Ｈ':'H','Ｉ':'I','Ｊ':'J','Ｋ':'K','Ｌ':'L','Ｍ':'M','Ｎ':'N','Ｏ':'O','Ｐ':'P','Ｑ':'Q','Ｒ':'R','Ｓ':'S','Ｔ':'T','Ｕ':'U','Ｖ':'V','Ｗ':'W','Ｘ':'X','Ｙ':'Y','Ｚ':'Z','ａ':'a','ｂ':'b','ｃ':'c','ｄ':'d','ｅ':'e','ｆ':'f','ｇ':'g','ｈ':'h','ｉ':'i','ｊ':'j','ｋ':'k','ｌ':'l','ｍ':'m','ｎ':'n','ｏ':'o','ｐ':'p','ｑ':'q','ｒ':'r','ｓ':'s','ｔ':'t','ｕ':'u','ｖ':'v','ｗ':'w','ｘ':'x','ｙ':'y','ｚ':'z'}; return map[result] || result;", enabled: true, order: 4, runChecked: false, isRegex: true, isJS: true },
+        { name: "删除段间换行", pattern: "(?<!\\n)\\n(?!\\n)", replacement: "", enabled: true, order: 5, runChecked: false, isRegex: true, isJS: false },
+        { name: "3-6个。→……", pattern: "。{3,6}", replacement: "……", enabled: true, order: 6, runChecked: true, isRegex: true, isJS: false },
+        { name: "删除书名《绝望海岛》", pattern: "《绝望海岛》", replacement: "", enabled: true, order: 7, runChecked: false, isRegex: true, isJS: false },
+        { name: "两个空格→换行", pattern: "[ \\u3000]{2,7}", replacement: "@js: return \"\\n\";", enabled: true, order: 8, runChecked: true, isRegex: true, isJS: true },
+        { name: "第X章前 空一行", pattern: "第([零一二三四五六七八九十百千万亿\\d]+)(?:回|章)[ \\t]*", replacement: "\\n\\n$&", enabled: true, order: 9, runChecked: true, isRegex: true, isJS: false },
+        { name: "05-压缩多余空行", pattern: "\\n\\s*\\n", replacement: "\n", enabled: true, order: 10, runChecked: true, isRegex: true, isJS: false },
+        { name: "删除带括号的书名", pattern: "【[^】]*?(?:大观园记|寻秦记)[^】]*?】", replacement: "", enabled: true, order: 11, runChecked: true, isRegex: true, isJS: false },
+        { name: "删除重复行", pattern: "^\\s*(.*?)\\s*$(?:\\r?\\n\\s*\\1\\s*$)+", replacement: "$1", enabled: true, order: 12, runChecked: true, isRegex: true, isJS: false },
+        { name: "删除行首/行尾空白及制表符", pattern: "^[ \\t]+|[ \\t]+$", replacement: "", enabled: true, order: 13, runChecked: true, isRegex: true, isJS: false }
+    ];
+    const defaultCustomRules = defaultCustomRulesRaw.map((r, idx) => ({ id: 2000 + idx, ...normalizeRuleFromImport(r), order: idx+1 }));
+
+    // ======================= 安全增强 =======================
+    // 增强的危险关键字检测（使用单词边界，防止部分匹配绕过）
+    function isJSCodeSafe(code) {
+        if (!code) return true;
+        const lower = code.toLowerCase();
+        // 危险模式列表：包括对象属性访问、动态代码执行、网络请求等
+        const dangerousPatterns = [
+            /\blocalstorage\b/, /\bsessionstorage\b/, /\bfetch\s*\(/, /\bxmlhttprequest\b/,
+            /\beval\s*\(/, /\bdocument\./, /\bwindow\./, /\balert\s*\(/, /\bconfirm\s*\(/,
+            /\bprompt\s*\(/, /\b__proto__\b/, /\bconstructor\b/, /\bimport\s*\(/,
+            /\brequire\s*\(/, /\bglobalThis\b/
+        ];
+        return !dangerousPatterns.some(pattern => pattern.test(lower));
+    }
+
+    // ======================= 辅助函数 =======================
+    function escapeRegex(str) { return String(str).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+    function unescapeReplacementString(str) {
+        if (typeof str !== 'string') return str;
+        return str.replace(/\\(n|r|t|\\)/g, (m, p1) => ({ n:'\n', r:'\r', t:'\t', '\\':'\\' }[p1] || m));
+    }
+
+    // 核心替换函数（已包含稳定检测：当一步替换结果与上一步相同时自动停止）
+    function performReplaceCore(text, pattern, replacement, flags, loop = false, useJS = false) {
+        if (!pattern) return { newText: text, changed: false, error: null };
+        let regex;
+        try { regex = new RegExp(pattern, flags); } catch(e) { return { newText: text, changed: false, error: e.message }; }
+        if (useJS) {
+            let jsFunc;
+            const safeReplacement = replacement || 'return result;';
+            if (!isJSCodeSafe(safeReplacement)) {
+                return { newText: text, changed: false, error: '安全限制: 替换JS代码包含潜在危险操作' };
+            }
+            try { jsFunc = new Function('result', safeReplacement); } catch(e) { return { newText: text, changed: false, error: `JS函数编译错误: ${e.message}` }; }
+            const replacer = (match) => { try { const res = jsFunc(match); return (res === undefined || res === null) ? match : String(res); } catch(e) { return match; } };
+            if (loop) {
+                let t = text;
+                for (let i = 0; i < 200; i++) {
+                    const step = t.replace(regex, replacer);
+                    if (step === t) break;  // 稳定检测
+                    t = step;
+                }
+                return { newText: t, changed: t !== text, error: null };
+            } else {
+                const n = text.replace(regex, replacer);
+                return { newText: n, changed: n !== text, error: null };
+            }
+        } else {
+            const effRep = unescapeReplacementString(replacement);
+            if (loop) {
+                let t = text;
+                for (let i = 0; i < 200; i++) {
+                    const step = t.replace(regex, effRep);
+                    if (step === t) break;
+                    t = step;
+                }
+                return { newText: t, changed: t !== text, error: null };
+            } else {
+                const n = text.replace(regex, effRep);
+                return { newText: n, changed: n !== text, error: null };
+            }
+        }
+    }
+
+    function getRegexFlags() { return (flagG.checked ? 'g' : '') + (flagI.checked ? 'i' : '') + (flagM.checked ? 'm' : ''); }
+    function showInfoMessage(msg, isError = false) {
+        const bar = document.querySelector('.info-bar');
+        if (bar) {
+            const s = document.createElement('span');
+            s.style.cssText = `background:${isError ? '#ffe6e5' : '#d9e9f7'};padding:2px 12px;border-radius:40px;margin-right:8px;`;
+            s.textContent = msg;
+            bar.appendChild(s);
+            setTimeout(() => { if (bar.contains(s)) bar.removeChild(s); }, 3000);
+        } else alert(msg);
+    }
+
+    // ======================= 配置保存/加载 =======================
+    function getCurrentFullConfig() {
+        return {
+            top: { regexPattern: regexInput.value, replacement: replacementInput.value, flagG: flagG.checked, flagI: flagI.checked, flagM: flagM.checked, topJsMode: topJsMode.checked, loopUntilStable: loopUntilStable.checked },
+            customRules: customRules.map(r => ({ id: r.id, name: r.name, pattern: r.pattern, replacement: r.replacement, enabled: r.enabled, order: r.order, runChecked: r.runChecked, isRegex: r.isRegex, isJS: r.isJS }))
+        };
+    }
+
+    function applyFullConfig(config, saveSnapshotFlag = true) {
+        if (!config) return false;
+        if (config.top) {
+            regexInput.value = config.top.regexPattern || '';
+            replacementInput.value = config.top.replacement || '';
+            flagG.checked = !!config.top.flagG; flagI.checked = !!config.top.flagI; flagM.checked = !!config.top.flagM;
+            topJsMode.checked = !!config.top.topJsMode; loopUntilStable.checked = !!config.top.loopUntilStable;
+        }
+        if (config.customRules && Array.isArray(config.customRules)) {
+            customRules = config.customRules.map(r => normalizeRuleFromImport(r));
+            reorderRules(); renderCustomTable(); saveCustomRulesToLocal();
+        }
+        if (saveSnapshotFlag) saveSnapshotToLocal(getCurrentFullConfig());
+        return true;
+    }
+
+    function saveCustomRulesToLocal() { try { localStorage.setItem(STORAGE_KEY_RULES, JSON.stringify(customRules.map(r => ({ id: r.id, name: r.name, pattern: r.pattern, replacement: r.replacement, enabled: r.enabled, order: r.order, runChecked: r.runChecked, isRegex: r.isRegex, isJS: r.isJS })))); } catch(e) { showInfoMessage("保存失败:存储限制", true); } }
+    function loadCustomRulesFromLocal() {
+        const saved = localStorage.getItem(STORAGE_KEY_RULES);
+        if (saved) { try { let arr = JSON.parse(saved); if (Array.isArray(arr) && arr.length) { customRules = arr.map(r => normalizeRuleFromImport(r)); return true; } } catch(e) {} }
+        customRules = JSON.parse(JSON.stringify(defaultCustomRules));
+        return false;
+    }
+    function saveSnapshotToLocal(config) { try { localStorage.setItem(STORAGE_SNAPSHOT_KEY, JSON.stringify(config)); } catch(e) {} }
+    function loadSnapshotFromLocal() { const snap = localStorage.getItem(STORAGE_SNAPSHOT_KEY); if (snap) { try { return JSON.parse(snap); } catch(e){} } return null; }
+
+    // ======================= 规则表操作 =======================
+    function reorderRules() { customRules.sort((a, b) => a.order - b.order); customRules.forEach((r, i) => r.order = i + 1); }
+    function renderCustomTable() {
+        const tbody = document.getElementById('customRuleTbody'); if (!tbody) return;
+        reorderRules(); tbody.innerHTML = '';
+        customRules.forEach(rule => {
+            const tr = document.createElement('tr');
+            const tdRun = document.createElement('td'); tdRun.className = 'rule-check'; const runChk = document.createElement('input'); runChk.type = 'checkbox'; runChk.checked = rule.runChecked; runChk.addEventListener('change', e => { rule.runChecked = e.target.checked; saveCustomRulesToLocal(); }); tdRun.appendChild(runChk); tr.appendChild(tdRun);
+            const tdRegex = document.createElement('td'); tdRegex.className = 'rule-check'; const regexChk = document.createElement('input'); regexChk.type = 'checkbox'; regexChk.checked = rule.isRegex; regexChk.addEventListener('change', e => { rule.isRegex = e.target.checked; saveCustomRulesToLocal(); }); tdRegex.appendChild(regexChk); tr.appendChild(tdRegex);
+            const tdJs = document.createElement('td'); tdJs.className = 'rule-check'; const jsChk = document.createElement('input'); jsChk.type = 'checkbox'; jsChk.checked = !!rule.isJS; jsChk.addEventListener('change', e => { rule.isJS = e.target.checked; saveCustomRulesToLocal(); }); tdJs.appendChild(jsChk); tr.appendChild(tdJs);
+            const tdOrder = document.createElement('td'); tdOrder.textContent = rule.order; tr.appendChild(tdOrder);
+            const tdName = document.createElement('td'); const nameInp = document.createElement('input'); nameInp.type = 'text'; nameInp.value = rule.name; nameInp.style.width = '130px'; nameInp.addEventListener('change', e => { rule.name = e.target.value; saveCustomRulesToLocal(); }); tdName.appendChild(nameInp); tr.appendChild(tdName);
+            const tdPat = document.createElement('td'); const patInp = document.createElement('input'); patInp.type = 'text'; patInp.value = rule.pattern; patInp.style.width = '260px'; patInp.style.fontFamily = 'monospace'; patInp.addEventListener('change', e => { rule.pattern = e.target.value; saveCustomRulesToLocal(); }); tdPat.appendChild(patInp); tr.appendChild(tdPat);
+            const tdRep = document.createElement('td'); const repInp = document.createElement('input'); repInp.type = 'text'; repInp.value = rule.replacement; repInp.style.width = '200px'; repInp.addEventListener('change', e => { rule.replacement = e.target.value; saveCustomRulesToLocal(); }); tdRep.appendChild(repInp); tr.appendChild(tdRep);
+            const tdAct = document.createElement('td'); tdAct.className = 'action-buttons';
+            const upBtn = document.createElement('button'); upBtn.textContent = '↑'; upBtn.className = 'icon-btn move-up'; upBtn.onclick = () => moveRule(rule.order, -1);
+            const downBtn = document.createElement('button'); downBtn.textContent = '↓'; downBtn.className = 'icon-btn move-down'; downBtn.onclick = () => moveRule(rule.order, 1);
+            const delBtn = document.createElement('button'); delBtn.textContent = '删'; delBtn.className = 'icon-btn delete'; delBtn.onclick = () => deleteRuleById(rule.id);
+            tdAct.append(upBtn, downBtn, delBtn); tr.appendChild(tdAct);
+            tbody.appendChild(tr);
+        });
+    }
+    function moveRule(curOrder, delta) { const idx = customRules.findIndex(r => r.order === curOrder); if (idx === -1) return; const tIdx = idx + delta; if (tIdx < 0 || tIdx >= customRules.length) return; [customRules[idx].order, customRules[tIdx].order] = [customRules[tIdx].order, customRules[idx].order]; reorderRules(); renderCustomTable(); saveCustomRulesToLocal(); showInfoMessage('顺序已调整'); }
+    function deleteRuleById(id) { customRules = customRules.filter(r => r.id !== id); reorderRules(); renderCustomTable(); saveCustomRulesToLocal(); showInfoMessage('规则已删除'); }
+    function addRule() { const newId = Date.now(); customRules.push({ id: newId, name: `新规则${customRules.length + 1}`, pattern: '', replacement: '', enabled: true, order: customRules.length + 1, runChecked: true, isRegex: true, isJS: false }); reorderRules(); renderCustomTable(); saveCustomRulesToLocal(); showInfoMessage('已添加新规则'); }
+    function resetDefaultRules() { if (confirm('重置所有规则为增强预设集（基于专业规则库）？当前改动将丢失。')) { customRules = JSON.parse(JSON.stringify(defaultCustomRules)); reorderRules(); renderCustomTable(); saveCustomRulesToLocal(); showInfoMessage('已重置为增强预设规则集'); } }
+    function selectAllRunChecks(checked) { customRules.forEach(r => r.runChecked = checked); renderCustomTable(); saveCustomRulesToLocal(); showInfoMessage(checked ? '已全选' : '已全部取消勾选'); }
+
+    // ======================= 批量运行与顶部替换 =======================
+    function batchRunCheckedRules() {
+        let src = sourceTextarea.value;
+        if (!src.trim()) return showInfoMessage('源文本为空');
+        const rules = customRules.filter(r => r.runChecked).sort((a, b) => a.order - b.order);
+        if (!rules.length) return showInfoMessage('没有勾选规则');
+        const flags = getRegexFlags();
+        const globalLoop = loopUntilStable.checked;
+        let cur = src, applied = 0;
+        for (let r of rules) {
+            if (!r.pattern.trim()) continue;
+            let pat = r.isRegex ? r.pattern : escapeRegex(r.pattern);
+            const res = performReplaceCore(cur, pat, r.replacement, flags, globalLoop, !!r.isJS);
+            if (res.error) { showInfoMessage(`规则"${r.name}"出错: ${res.error}`, true); break; }
+            if (res.changed) { applied++; cur = res.newText; }
+        }
+        resultTextarea.value = cur;
+        resultTextarea.dispatchEvent(new Event('input', { bubbles: true }));
+        recordCurrentState();
+        showInfoMessage(`批量完成: ${rules.length}条规则中${applied}条生效`);
+    }
+
+    function applyRegexAndUpdate(showStats = true) {
+        const src = sourceTextarea.value;
+        if (!src) { resultTextarea.value = ''; resultTextarea.dispatchEvent(new Event('input', { bubbles: true })); if (showStats) showInfoMessage("源文本为空"); return; }
+        const pat = regexInput.value.trim();
+        if (!pat) { resultTextarea.value = src; resultTextarea.dispatchEvent(new Event('input', { bubbles: true })); if (showStats) showInfoMessage("正则表达式为空"); return; }
+        const res = performReplaceCore(src, pat, replacementInput.value, getRegexFlags(), loopUntilStable.checked, topJsMode.checked);
+        if (res.error) { resultTextarea.value = src; showInfoMessage('出错: ' + res.error, true); return; }
+        resultTextarea.value = res.newText;
+        resultTextarea.dispatchEvent(new Event('input', { bubbles: true }));
+        recordCurrentState();
+        if (showStats) showInfoMessage(`✅ ${res.changed ? '已应用替换' + (loopUntilStable.checked ? ' (循环至稳定)' : '') : '未发生改变'}`);
+    }
+
+    // ======================= 撤销 / 重做（双向历史导航） =======================
+    let undoStack = [], currentUndoIndex = -1, MAX_UNDO_STACK = 50;
+    function pushHistory(s, r) {
+        if (undoStack.length && currentUndoIndex >= 0 && undoStack[currentUndoIndex] && undoStack[currentUndoIndex].source === s && undoStack[currentUndoIndex].result === r) return;
+        if (currentUndoIndex < undoStack.length - 1) {
+            undoStack = undoStack.slice(0, currentUndoIndex + 1);
+        }
+        undoStack.push({ source: s, result: r });
+        if (undoStack.length > MAX_UNDO_STACK) undoStack.shift();
+        currentUndoIndex = undoStack.length - 1;
+    }
+    function recordCurrentState() { pushHistory(sourceTextarea.value, resultTextarea.value); }
+    function undo() {
+        if (currentUndoIndex <= 0) return showInfoMessage("没有更早的历史记录");
+        currentUndoIndex--;
+        const st = undoStack[currentUndoIndex];
+        if (st) {
+            sourceTextarea.value = st.source;
+            resultTextarea.value = st.result;
+            resultTextarea.dispatchEvent(new Event('input', { bubbles: true }));
+            showInfoMessage("已撤销");
+        }
+    }
+    function redo() {
+        if (currentUndoIndex >= undoStack.length - 1) return showInfoMessage("没有更新的历史记录");
+        currentUndoIndex++;
+        const st = undoStack[currentUndoIndex];
+        if (st) {
+            sourceTextarea.value = st.source;
+            resultTextarea.value = st.result;
+            resultTextarea.dispatchEvent(new Event('input', { bubbles: true }));
+            showInfoMessage("已重做");
+        }
+    }
+
+    // ======================= 搜索结果高亮与精确滚动 =======================
+    let searchMatches = [], currentMatchIndex = -1;
+    function findAllMatches(text, searchStr, caseSensitive) {
+        const matches = []; if (!searchStr || !text) return matches;
+        const src = caseSensitive ? text : text.toLowerCase();
+        const tgt = caseSensitive ? searchStr : searchStr.toLowerCase();
+        let from = 0;
+        while ((from = src.indexOf(tgt, from)) !== -1) {
+            matches.push({ start: from, end: from + tgt.length });
+            from += 1;
+        }
+        return matches;
+    }
+    function updateSearchMatches(autoSelect = true) {
+        const text = resultTextarea.value, str = resultSearchInput.value, cs = resultSearchCase.checked;
+        searchMatches = findAllMatches(text, str, cs);
+        currentMatchIndex = searchMatches.length > 0 ? 0 : -1;
+        const total = searchMatches.length, cur = total > 0 ? currentMatchIndex + 1 : 0;
+        resultSearchCount.textContent = `${cur}/${total}`;
+        resultSearchCount.classList.remove('no-match', 'has-match');
+        if (total > 0) resultSearchCount.classList.add('has-match');
+        else if (str.trim() !== '') resultSearchCount.classList.add('no-match');
+        if (autoSelect && searchMatches.length > 0) highlightMatch(0, false);
+        else if (!searchMatches.length) clearResultSelection();
+    }
+    // 精确滚动到光标所在位置（通过隐藏测量元素）
+    function scrollToCaretInTextarea(textarea, caretPos) {
+        if (!textarea || caretPos === undefined) return;
+        const div = document.createElement('div');
+        const style = getComputedStyle(textarea);
+        div.style.cssText = `position: absolute; top: -9999px; left: -9999px; white-space: pre-wrap; word-wrap: break-word; font-family: ${style.fontFamily}; font-size: ${style.fontSize}; line-height: ${style.lineHeight}; padding: ${style.padding}; width: ${textarea.clientWidth}px; border: none; overflow: auto;`;
+        const textBefore = textarea.value.substring(0, caretPos);
+        div.textContent = textBefore;
+        document.body.appendChild(div);
+        const caretY = div.scrollHeight;
+        textarea.scrollTop = Math.max(0, caretY - textarea.clientHeight / 2);
+        document.body.removeChild(div);
+    }
+    function highlightMatch(index, focusResult = false) {
+        if (index < 0 || index >= searchMatches.length) return;
+        const match = searchMatches[index];
+        currentMatchIndex = index;
+        resultTextarea.focus();
+        resultTextarea.setSelectionRange(match.start, match.end);
+        if (focusResult) {
+            scrollToCaretInTextarea(resultTextarea, match.start);
+        }
+        updateSearchCountDisplay();
+    }
+    function updateSearchCountDisplay() {
+        const total = searchMatches.length;
+        const cur = total > 0 ? currentMatchIndex + 1 : 0;
+        resultSearchCount.textContent = `${cur}/${total}`;
+    }
+    function clearResultSelection() {
+        const pos = resultTextarea.selectionStart;
+        if (pos !== undefined) resultTextarea.setSelectionRange(pos, pos);
+    }
+    function navigateMatch(direction) {
+        if (searchMatches.length === 0) { updateSearchMatches(true); if (!searchMatches.length) return; }
+        let newIdx = currentMatchIndex + direction;
+        if (newIdx < 0) newIdx = searchMatches.length - 1;
+        else if (newIdx >= searchMatches.length) newIdx = 0;
+        highlightMatch(newIdx, true);
+    }
+    function clearSearch() {
+        resultSearchInput.value = '';
+        searchMatches = [];
+        currentMatchIndex = -1;
+        updateSearchCountDisplay();
+        clearResultSelection();
+        resultSearchInput.focus();
+    }
+
+    // ======================= 事件绑定 =======================
+    function bindEvents() {
+        applyRegexBtn.addEventListener('click', () => { recordCurrentState(); applyRegexAndUpdate(true); });
+        loadPresetBtn.addEventListener('click', () => {
+            const sel = presetSelect.value;
+            if (sel) {
+                const p = {
+                    del_ads: { pattern: "^.*(版主提醒|版主评語|欢迎来到|阅读文章|您的留言|认真回复|作者：|发表于：|首发：|字数：|待续).*$", replacement: "" },
+                    del_ticket: { pattern: "[([{（［｛【][^\\](){}）］｝】]*?(?:求\\w{0,4}[订推藏]|推荐|码字|月票|打赏)[^\\](){}）］｝】]*?[\\]\\}\\)）］｝】]", replacement: "" },
+                    del_daixu: { pattern: "[（(][^）)]*待续[^）)]*[）)]", replacement: "" },
+                    merge_internal: { pattern: "([^ \\t\\n\\r])\\r?\\n([^ \\t\\n\\r])", replacement: "$1$2" },
+                    compress_empty: { pattern: "\\n\\s*\\n", replacement: "\n" },
+                    del_blank_lines: { pattern: "^\\s*$\\r?\\n?", replacement: "" },
+                    clean_brackets: { pattern: "[\\[\\{（【][^\\]\\}）】]*?(?:待续|求\\w{0,4}[订推藏]|推荐)\\s*[\\]\\}）】]", replacement: "" }
+                }[sel];
+                if (p) {
+                    regexInput.value = p.pattern;
+                    replacementInput.value = p.replacement;
+                    flagG.checked = true;
+                    flagI.checked = false;
+                    flagM.checked = (sel === 'del_ads' || sel === 'compress_empty' || sel === 'del_blank_lines');
+                    topJsMode.checked = false;
+                    showInfoMessage(`已载入预设：${sel}`);
+                }
+            } else showInfoMessage("请选择一个预设规则");
+        });
+        resetToDefaultBtn.addEventListener('click', () => {
+            regexInput.value = "^.*(版主提醒|版主评語|欢迎来到|阅读文章|您的留言|认真回复|作者：|发表于：|首发：|字数：|待续).*$";
+            replacementInput.value = "";
+            flagG.checked = true;
+            flagI.checked = false;
+            flagM.checked = true;
+            topJsMode.checked = false;
+            showInfoMessage("已恢复默认广告行删除规则");
+            applyRegexAndUpdate(true);
+        });
+        importBtn.addEventListener('click', () => {
+            const i = document.createElement('input');
+            i.type = 'file';
+            i.accept = '.txt,.text/plain';
+            i.onchange = e => {
+                const f = e.target.files[0];
+                if (f) {
+                    const r = new FileReader();
+                    r.onload = ev => {
+                        sourceTextarea.value = ev.target.result;
+                        showInfoMessage(`已导入: ${f.name}`);
+                        applyRegexAndUpdate(false);
+                    };
+                    r.readAsText(f, 'UTF-8');
+                }
+            };
+            i.click();
+        });
+        exportBtn.addEventListener('click', () => {
+            const content = resultTextarea.value;
+            if (!content) return alert("结果为空");
+            const b = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(b);
+            a.download = 'textpro_output.txt';
+            a.click();
+            URL.revokeObjectURL(a.href);
+            showInfoMessage("导出成功");
+        });
+        copySourceBtn.addEventListener('click', () => { navigator.clipboard?.writeText(sourceTextarea.value); showInfoMessage("源文本已复制"); });
+        copyResultBtn.addEventListener('click', () => { navigator.clipboard?.writeText(resultTextarea.value); showInfoMessage("结果文本已复制"); });
+        clearAllBtn.addEventListener('click', () => { sourceTextarea.value = ''; resultTextarea.value = ''; regexInput.value = ''; replacementInput.value = ''; resultTextarea.dispatchEvent(new Event('input', { bubbles: true })); showInfoMessage("已清空所有文本和正则"); });
+        statsBtn.addEventListener('click', () => { alert(`📊 统计\n源文本: ${sourceTextarea.value.split(/\r?\n/).length}行, ${sourceTextarea.value.length}字符\n结果文本: ${resultTextarea.value.split(/\r?\n/).length}行, ${resultTextarea.value.length}字符`); });
+        undoBtn.addEventListener('click', undo);
+        redoBtn.addEventListener('click', redo);
+        addRuleBtn.addEventListener('click', () => { recordCurrentState(); addRule(); });
+        resetDefaultRulesBtn.addEventListener('click', resetDefaultRules);
+        batchRunCheckedBtn.addEventListener('click', () => { recordCurrentState(); batchRunCheckedRules(); });
+        selectAllRulesBtn.addEventListener('click', () => selectAllRunChecks(true));
+        deselectAllRulesBtn.addEventListener('click', () => selectAllRunChecks(false));
+        exportFullConfigBtn.addEventListener('click', () => { const config = getCurrentFullConfig(); const dataStr = JSON.stringify(config, null, 2); const blob = new Blob([dataStr], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'textpro_workspace_config.json'; a.click(); URL.revokeObjectURL(a.href); showInfoMessage('完整配置已导出'); });
+        importFullConfigBtn.addEventListener('click', () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = e => {
+                if (e.target.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = ev => {
+                        try {
+                            const cfg = JSON.parse(ev.target.result);
+                            if (cfg && (cfg.top || cfg.customRules)) {
+                                if (confirm("导入配置将覆盖当前所有规则及顶部设置，且可能包含JS代码，是否继续？")) {
+                                    applyFullConfig(cfg, true);
+                                    showInfoMessage('配置导入成功');
+                                }
+                            } else throw new Error();
+                        } catch (err) { alert('配置文件无效'); }
+                    };
+                    reader.readAsText(e.target.files[0]);
+                }
+            };
+            input.click();
+        });
+        saveSnapshotBtn.addEventListener('click', () => { saveSnapshotToLocal(getCurrentFullConfig()); showInfoMessage('当前工作区配置已保存为快照'); });
+        sourceTextarea.addEventListener('input', () => { setTimeout(recordCurrentState, 300); });
+        resultTextarea.addEventListener('input', () => { if (resultSearchInput.value.trim() !== '') updateSearchMatches(false); else clearSearch(); });
+        resultSearchInput.addEventListener('input', () => updateSearchMatches(true));
+        resultSearchInput.addEventListener('keydown', e => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                e.shiftKey ? navigateMatch(-1) : (searchMatches.length === 0 ? updateSearchMatches(true) : navigateMatch(1));
+            } else if (e.key === 'Escape') { e.preventDefault(); clearSearch(); }
+        });
+        resultSearchPrev.addEventListener('click', () => navigateMatch(-1));
+        resultSearchNext.addEventListener('click', () => navigateMatch(1));
+        resultSearchClear.addEventListener('click', clearSearch);
+        resultSearchCase.addEventListener('change', () => updateSearchMatches(true));
+        resultTextarea.addEventListener('scroll', () => {
+            const ratio = resultTextarea.scrollTop / (resultTextarea.scrollHeight - resultTextarea.clientHeight);
+            if (!isNaN(ratio)) sourceTextarea.scrollTop = ratio * (sourceTextarea.scrollHeight - sourceTextarea.clientHeight);
+        });
+        sourceTextarea.addEventListener('scroll', () => {
+            const ratio = sourceTextarea.scrollTop / (sourceTextarea.scrollHeight - sourceTextarea.clientHeight);
+            if (!isNaN(ratio)) resultTextarea.scrollTop = ratio * (resultTextarea.scrollHeight - resultTextarea.clientHeight);
+        });
+    }
+
+    // ======================= 初始化 =======================
+    loadCustomRulesFromLocal();
+    const snapshot = loadSnapshotFromLocal();
+    if (snapshot) { applyFullConfig(snapshot, false); showInfoMessage('已加载上次工作区快照'); }
+    else { renderCustomTable(); saveCustomRulesToLocal(); }
+    bindEvents();
+    recordCurrentState();
+})();
+</script>
+</body>
+</html>
