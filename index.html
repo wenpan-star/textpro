@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>TextPro 文本净化工具 V8.3.0 · 同步滚动+安全增强</title>
+    <title>TextPro 文本净化工具 V8.4.0 · 列宽可调+交互增强</title>
     <style>
         * {
             box-sizing: border-box;
@@ -25,6 +25,7 @@
             --table-header-bg: #f2f6fb;
             --table-border: #e0e6ef;
             --select-bg: #ffffff;
+            --resize-handle-color: #90b4d4;
         }
         body.dark {
             --bg-body: #0f172a;
@@ -42,6 +43,7 @@
             --table-header-bg: #0f172a;
             --table-border: #334155;
             --select-bg: #1e293b;
+            --resize-handle-color: #5f7f9e;
         }
         body {
             background: var(--bg-body);
@@ -152,24 +154,54 @@
             align-items: center;
             gap: 4px;
             font-size: 0.8rem;
-            font-weight: 500;
-            color: var(--text-secondary);
+            font-weight: 600;
+            color: #1f5e7e;
             cursor: pointer;
             white-space: nowrap;
         }
+        body.dark .search-case-label {
+            color: #b9e6ff;
+        }
+        .search-case-label input[type="checkbox"] {
+            accent-color: #1f5e7e;
+            width: 16px;
+            height: 16px;
+            margin-right: 4px;
+            vertical-align: middle;
+        }
+        body.dark .search-case-label input[type="checkbox"] {
+            accent-color: #60a5fa;
+        }
         .search-count {
             font-size: 0.8rem;
-            font-weight: 600;
-            background: #e6f0f9;
+            font-weight: 700;
+            background: #e2eaf1;
+            color: #0b3b4f;
             padding: 4px 12px;
             border-radius: 60px;
             min-width: 50px;
             text-align: center;
         }
-        .search-count.no-match { background: #ffeaea; color: #b91c1c; }
-        .search-count.has-match { background: #e6f4ea; color: #166534; }
-        body.dark .search-count.no-match { background: #7f1a1a; color: #fecaca; }
-        body.dark .search-count.has-match { background: #14532d; color: #bbf7d0; }
+        .search-count.has-match {
+            background: #c8e6d9;
+            color: #0a3b2a;
+        }
+        .search-count.no-match {
+            background: #ffddd6;
+            color: #b13b2a;
+        }
+        body.dark .search-count {
+            background: #2d3a4b;
+            color: #d9e9ff;
+        }
+        body.dark .search-count.has-match {
+            background: #1b4d3e;
+            color: #c0f0da;
+        }
+        body.dark .search-count.no-match {
+            background: #5e2a2a;
+            color: #ffc9c9;
+        }
         .global-control-bar {
             display: flex;
             flex-wrap: wrap;
@@ -338,7 +370,10 @@
             background: var(--table-header-bg);
             font-weight: 600;
             font-size: 13px;
+            position: relative;
+            user-select: none;
         }
+        /* 列宽默认值 - 操作列适当加宽 */
         .rule-table th:nth-child(1) { width: 48px; }
         .rule-table th:nth-child(2) { width: 48px; }
         .rule-table th:nth-child(3) { width: 60px; }
@@ -346,7 +381,7 @@
         .rule-table th:nth-child(5) { width: 16%; min-width: 130px; }
         .rule-table th:nth-child(6) { width: 28%; min-width: 200px; }
         .rule-table th:nth-child(7) { width: 26%; min-width: 180px; }
-        .rule-table th:nth-child(8) { width: 170px; }
+        .rule-table th:nth-child(8) { width: 200px; }  /* 操作列增加宽度 */
         .rule-table td:nth-child(5) input,
         .rule-table td:nth-child(6) input,
         .rule-table td:nth-child(7) input {
@@ -366,8 +401,8 @@
         }
         .action-buttons {
             display: flex;
-            gap: 5px;
-            flex-wrap: nowrap;
+            gap: 6px;
+            flex-wrap: wrap;
             justify-content: flex-start;
             align-items: center;
         }
@@ -375,7 +410,7 @@
             background: #f0f2f5;
             border: 1px solid #cbd5e1;
             border-radius: 28px;
-            padding: 5px 10px;
+            padding: 4px 8px;
             cursor: pointer;
             font-size: 12px;
             transition: all 0.2s;
@@ -384,7 +419,7 @@
             gap: 2px;
             font-weight: 500;
             white-space: nowrap;
-            min-width: 38px;
+            min-width: 32px;
             justify-content: center;
         }
         body.dark .icon-btn {
@@ -399,6 +434,44 @@
         .icon-btn.top-btn, .icon-btn.bottom-btn { background: #e9f0fa; border-color: #bdd3f0; color: #1e4a76; }
         body.dark .icon-btn.top-btn, body.dark .icon-btn.bottom-btn { background: #1e3a8a; border-color: #60a5fa; color: #bfdbfe; }
         .icon-btn:hover { filter: brightness(0.96); transform: translateY(-1px); }
+        /* 搜索栏内导航按钮单独加强 */
+        .icon-btn.nav-btn, .icon-btn.clear-btn {
+            background: #ffffff;
+            border: 1px solid #b9cfdf;
+            color: #1f5e7e;
+            border-radius: 28px;
+            padding: 5px 10px;
+            min-width: 38px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        body.dark .icon-btn.nav-btn, body.dark .icon-btn.clear-btn {
+            background: #1e293b;
+            border-color: #475569;
+            color: #cbd5e6;
+        }
+        .icon-btn.nav-btn:hover, .icon-btn.clear-btn:hover {
+            background: #e6f4ff;
+            border-color: #7ba5c2;
+        }
+        body.dark .icon-btn.nav-btn:hover, body.dark .icon-btn.clear-btn:hover {
+            background: #334155;
+            border-color: #60a5fa;
+        }
+        /* 列宽拖拽把手 */
+        .resizer {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 8px;
+            height: 100%;
+            cursor: col-resize;
+            background: transparent;
+            z-index: 10;
+            transition: background 0.1s;
+        }
+        .resizer:hover {
+            background: var(--resize-handle-color);
+        }
         .scrollable-table {
             max-height: 480px;
             overflow-y: auto;
@@ -458,8 +531,8 @@
             .card-header { padding: 0.8rem 1rem; flex-direction: column; align-items: stretch; }
             .rule-table th, .rule-table td { padding: 6px 3px; font-size: 11px; }
             .rule-table input[type="text"] { font-size: 10px; padding: 4px; }
-            .action-buttons { gap: 3px; flex-wrap: wrap; }
-            .icon-btn { padding: 4px 6px; font-size: 10px; min-width: 34px; }
+            .action-buttons { gap: 4px; flex-wrap: wrap; }
+            .icon-btn { padding: 4px 6px; font-size: 10px; min-width: 32px; }
             .global-control-bar { flex-direction: column; align-items: stretch; }
             .quick-replace-bar { flex-direction: column; align-items: stretch; }
             .safety-option { margin-left: 0; justify-content: center; margin-top: 8px; }
@@ -512,7 +585,6 @@
             border: 1px solid var(--btn-outline-border);
             box-shadow: none;
         }
-        /* 同步滚动选择器样式 */
         .sync-select {
             background: var(--select-bg);
             color: var(--text-primary);
@@ -628,7 +700,7 @@
     <div class="card">
         <div class="card-header">
             <span>📋 自定义替换表（顺序批量运行）</span>
-            <span class="badge">上移/下移/置顶/置底 | 独立JS模式</span>
+            <span class="badge">上移/下移/置顶/置底 | 独立JS模式 | 可拖拽列宽</span>
         </div>
         <div class="card-body">
             <div class="global-control-bar">
@@ -673,6 +745,7 @@
             <div class="info-bar">
                 <span>✅ 【JS模式】替换文本作为函数体 (result→返回值)。普通模式支持 $1 和转义符。</span>
                 <span>🔧 批量运行遇到错误规则将自动跳过并提示，不影响后续规则。</span>
+                <span>📌 提示：鼠标拖动表格列右侧边缘可调整列宽，配置导出时会自动保存布局。</span>
             </div>
 
             <div class="help-section">
@@ -682,7 +755,7 @@
                     <strong>JS 模式：</strong> 函数体接收参数 result (匹配的完整字符串)，返回替换后的字符串。示例：<code>return result.toUpperCase();</code><br>
                     <strong>安全警告：</strong> JS模式可能执行任意代码，切勿使用不可信规则。本工具已拦截危险API（fetch, eval, document, Image, WebSocket 等）。<br>
                     <strong>快速替换：</strong> 临时执行一条规则，不保存到规则表，方便测试。<br>
-                    <strong>新增功能：</strong> 暗色主题 🌙、正则模板库、大文本警告、JS模式二次确认、双栏同步滚动（比例/像素/关闭）。
+                    <strong>新增功能：</strong> 暗色主题 🌙、正则模板库、大文本警告、JS模式二次确认、双栏同步滚动（比例/像素/关闭）、列宽可调并持久化。
                 </div>
             </div>
         </div>
@@ -747,11 +820,15 @@
     const resultSearchClear = document.getElementById('resultSearchClear');
 
     let customRules = [];
-    const STORAGE_KEY_RULES = 'textpro_custom_rules_v8';
-    const STORAGE_SNAPSHOT_KEY = 'textpro_full_workspace_v8';
+    const STORAGE_KEY_RULES = 'textpro_custom_rules_v84';
+    const STORAGE_SNAPSHOT_KEY = 'textpro_full_workspace_v84';
     const STORAGE_AUTO_LOAD = 'textpro_auto_load_snapshot';
     const STORAGE_DARK_MODE = 'textpro_dark_mode';
     const STORAGE_SYNC_MODE = 'textpro_sync_mode';
+    const STORAGE_COLUMN_WIDTHS = 'textpro_column_widths'; // 单独存储列宽，优先级高于快照
+
+    // 全局列宽存储
+    let currentColumnWidths = [];
 
     try {
         autoLoadSnapshot.checked = localStorage.getItem(STORAGE_AUTO_LOAD) === 'true';
@@ -762,16 +839,22 @@
         } else {
             darkModeToggle.textContent = '🌙 暗色';
         }
-        // 读取同步模式偏好，默认比例同步
         const savedSyncMode = localStorage.getItem(STORAGE_SYNC_MODE);
         if (savedSyncMode && ['off', 'pixel', 'proportion'].includes(savedSyncMode)) {
             syncScrollSelect.value = savedSyncMode;
         } else {
             syncScrollSelect.value = 'proportion';
         }
+        // 读取之前保存的列宽
+        const savedWidths = localStorage.getItem(STORAGE_COLUMN_WIDTHS);
+        if (savedWidths) {
+            try {
+                currentColumnWidths = JSON.parse(savedWidths);
+            } catch(e) {}
+        }
     } catch(e) {}
 
-    // ======================= 安全检测（加强） =======================
+    // ======================= 安全检测 =======================
     function isJSCodeSafe(code) {
         if (!code) return true;
         const lower = code.toLowerCase();
@@ -784,7 +867,6 @@
             /\bdocument\.cookie\b/, /\bsetTimeout\s*\(\s*['"]/, /\bsetInterval\s*\(\s*['"]/
         ];
         if (dangerous.some(p => p.test(lower))) return false;
-        
         const concatPattern = /['"`]\s*\+\s*['"`]/;
         if (concatPattern.test(code)) {
             const dangerousWords = ['fetch', 'xmlhttp', 'eval', 'document', 'window', 'alert', 'image', 'websocket', 'localstorage', 'sessionstorage'];
@@ -897,13 +979,115 @@
         } else alert(msg);
     }
 
+    // ======================= 列宽持久化相关 =======================
+    function saveColumnWidths() {
+        const ths = document.querySelectorAll('#customRuleTable th');
+        if (!ths.length) return;
+        const widths = Array.from(ths).map(th => th.offsetWidth);
+        currentColumnWidths = widths;
+        try {
+            localStorage.setItem(STORAGE_COLUMN_WIDTHS, JSON.stringify(widths));
+            // 同时更新全局配置快照中的列宽
+            const cfg = getCurrentFullConfig();
+            cfg.columnWidths = widths;
+            saveSnapshotToLocal(cfg);
+        } catch(e) {}
+    }
+
+    function applyColumnWidths(widths) {
+        if (!widths || widths.length === 0) return;
+        const ths = document.querySelectorAll('#customRuleTable th');
+        if (ths.length !== widths.length) return;
+        for (let i = 0; i < ths.length; i++) {
+            ths[i].style.width = widths[i] + 'px';
+            ths[i].style.minWidth = '30px';
+        }
+    }
+
+    function initResizableColumns() {
+        const ths = document.querySelectorAll('#customRuleTable th');
+        if (ths.length === 0) return;
+        // 移除旧的 resizer 避免重复
+        ths.forEach(th => {
+            const oldResizer = th.querySelector('.resizer');
+            if (oldResizer) oldResizer.remove();
+        });
+        ths.forEach((th, idx) => {
+            // 最后一列（操作列）也可以调整，但为了方便，全部加上拖拽
+            const resizer = document.createElement('div');
+            resizer.className = 'resizer';
+            th.style.position = 'relative';
+            th.appendChild(resizer);
+            
+            let startX = 0, startWidth = 0;
+            let isDragging = false;
+            
+            const onDragStart = (e) => {
+                e.preventDefault();
+                startX = e.clientX;
+                startWidth = th.offsetWidth;
+                isDragging = true;
+                document.body.style.userSelect = 'none';
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+                // 移动端触摸
+                document.addEventListener('touchmove', onTouchMove, { passive: false });
+                document.addEventListener('touchend', onTouchEnd);
+            };
+            
+            const onMouseMove = (e) => {
+                if (!isDragging) return;
+                const dx = e.clientX - startX;
+                let newWidth = startWidth + dx;
+                if (newWidth < 40) newWidth = 40;
+                th.style.width = newWidth + 'px';
+                // 实时调整表格布局
+                const table = document.getElementById('customRuleTable');
+                if (table) table.style.width = '100%';
+            };
+            
+            const onTouchMove = (e) => {
+                if (!isDragging) return;
+                e.preventDefault();
+                const touch = e.touches[0];
+                const dx = touch.clientX - startX;
+                let newWidth = startWidth + dx;
+                if (newWidth < 40) newWidth = 40;
+                th.style.width = newWidth + 'px';
+                const table = document.getElementById('customRuleTable');
+                if (table) table.style.width = '100%';
+            };
+            
+            const onDragEnd = () => {
+                if (!isDragging) return;
+                isDragging = false;
+                document.body.style.userSelect = '';
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+                document.removeEventListener('touchmove', onTouchMove);
+                document.removeEventListener('touchend', onTouchEnd);
+                saveColumnWidths();
+            };
+            
+            const onMouseUp = onDragEnd;
+            const onTouchEnd = onDragEnd;
+            
+            resizer.addEventListener('mousedown', onDragStart);
+            resizer.addEventListener('touchstart', onDragStart, { passive: false });
+        });
+    }
+
+    // ======================= 配置导入导出 =======================
     function getCurrentFullConfig() {
-        return {
+        const cfg = {
             version: 8,
             globalFlags: { flagG: flagG.checked, flagI: flagI.checked, flagM: flagM.checked, loopUntilStable: loopUntilStable.checked },
-            customRules: customRules.map(r => ({ id: r.id, name: r.name, pattern: r.pattern, replacement: r.replacement, enabled: r.enabled, order: r.order, runChecked: r.runChecked, isRegex: r.isRegex, isJS: r.isJS }))
+            customRules: customRules.map(r => ({ id: r.id, name: r.name, pattern: r.pattern, replacement: r.replacement, enabled: r.enabled, order: r.order, runChecked: r.runChecked, isRegex: r.isRegex, isJS: r.isJS })),
+            columnWidths: currentColumnWidths
         };
+        return cfg;
     }
+    
     function applyFullConfig(config, saveSnapshotFlag = true) {
         if (!config) return false;
         if (config.globalFlags) {
@@ -914,16 +1098,31 @@
         }
         if (config.customRules && Array.isArray(config.customRules)) {
             customRules = config.customRules.map(r => normalizeRuleFromImport(r));
-            reorderRules(); renderCustomTable(); saveCustomRulesToLocal();
+            reorderRules(); 
+            renderCustomTable(); 
+            saveCustomRulesToLocal();
+        }
+        if (config.columnWidths && Array.isArray(config.columnWidths) && config.columnWidths.length > 0) {
+            currentColumnWidths = config.columnWidths;
+            try {
+                localStorage.setItem(STORAGE_COLUMN_WIDTHS, JSON.stringify(currentColumnWidths));
+            } catch(e) {}
+            // 等待表格渲染完成后再应用列宽
+            setTimeout(() => {
+                applyColumnWidths(currentColumnWidths);
+                initResizableColumns(); // 重新绑定拖拽
+            }, 20);
         }
         if (saveSnapshotFlag) saveSnapshotToLocal(getCurrentFullConfig());
         return true;
     }
+    
     function saveCustomRulesToLocal() { try { localStorage.setItem(STORAGE_KEY_RULES, JSON.stringify(customRules.map(r => ({ id: r.id, name: r.name, pattern: r.pattern, replacement: r.replacement, order: r.order, runChecked: r.runChecked, isRegex: r.isRegex, isJS: r.isJS })))); } catch(e) {} }
     function saveSnapshotToLocal(config) { try { localStorage.setItem(STORAGE_SNAPSHOT_KEY, JSON.stringify(config)); } catch(e) {} }
     function loadSnapshotFromLocal() { const snap = localStorage.getItem(STORAGE_SNAPSHOT_KEY); if (snap) { try { return JSON.parse(snap); } catch(e){} } return null; }
 
     function reorderRules() { customRules.sort((a, b) => a.order - b.order); customRules.forEach((r, i) => r.order = i + 1); }
+    
     function renderCustomTable() {
         const tbody = document.getElementById('customRuleTbody'); if (!tbody) return;
         reorderRules(); tbody.innerHTML = '';
@@ -954,7 +1153,15 @@
             tdAct.append(upBtn, downBtn, topBtn, bottomBtn, delBtn); tr.appendChild(tdAct);
             tbody.appendChild(tr);
         });
+        // 渲染完成后恢复列宽并重新绑定拖拽
+        setTimeout(() => {
+            if (currentColumnWidths && currentColumnWidths.length) {
+                applyColumnWidths(currentColumnWidths);
+            }
+            initResizableColumns();
+        }, 10);
     }
+    
     function moveRule(curOrder, delta) { const idx = customRules.findIndex(r => r.order === curOrder); if (idx === -1) return; const tIdx = idx + delta; if (tIdx < 0 || tIdx >= customRules.length) return; [customRules[idx].order, customRules[tIdx].order] = [customRules[tIdx].order, customRules[idx].order]; reorderRules(); renderCustomTable(); saveCustomRulesToLocal(); showInfoMessage('顺序已调整'); }
     function moveToTop(ruleId) { const idx = customRules.findIndex(r => r.id === ruleId); if (idx <= 0) return; const [rule] = customRules.splice(idx, 1); customRules.unshift(rule); reorderRules(); renderCustomTable(); saveCustomRulesToLocal(); showInfoMessage('已置顶'); }
     function moveToBottom(ruleId) { const idx = customRules.findIndex(r => r.id === ruleId); if (idx === -1 || idx === customRules.length-1) return; const [rule] = customRules.splice(idx, 1); customRules.push(rule); reorderRules(); renderCustomTable(); saveCustomRulesToLocal(); showInfoMessage('已置底'); }
@@ -1052,24 +1259,21 @@
     function undo() { if (currentUndoIndex <=0) return showInfoMessage("无历史"); currentUndoIndex--; const st = undoStack[currentUndoIndex]; if(st){ sourceTextarea.value = st.source; resultTextarea.value = st.result; resultTextarea.dispatchEvent(new Event('input',{bubbles:true})); showInfoMessage("已撤销"); } }
     function redo() { if (currentUndoIndex >= undoStack.length-1) return showInfoMessage("无重做"); currentUndoIndex++; const st = undoStack[currentUndoIndex]; if(st){ sourceTextarea.value = st.source; resultTextarea.value = st.result; resultTextarea.dispatchEvent(new Event('input',{bubbles:true})); showInfoMessage("已重做"); } }
 
-    // ======================= 同步滚动（比例 / 像素 / 关闭） =======================
+    // ======================= 同步滚动 =======================
     let isSyncingScroll = false;
-    let currentSyncMode = syncScrollSelect.value; // 'off', 'pixel', 'proportion'
-
+    let currentSyncMode = syncScrollSelect.value;
     function getScrollPercent(textarea) {
         const { scrollTop, scrollHeight, clientHeight } = textarea;
         if (scrollHeight <= clientHeight) return 0;
         const maxScroll = scrollHeight - clientHeight;
         return Math.min(1, Math.max(0, scrollTop / maxScroll));
     }
-
     function setScrollPercent(textarea, percent) {
         const { scrollHeight, clientHeight } = textarea;
         if (scrollHeight <= clientHeight) return;
         const maxScroll = scrollHeight - clientHeight;
         textarea.scrollTop = percent * maxScroll;
     }
-
     function syncScroll(from, to) {
         if (isSyncingScroll) return;
         if (currentSyncMode === 'off') return;
@@ -1083,25 +1287,18 @@
         }
         isSyncingScroll = false;
     }
-
     function onSourceScroll() { syncScroll(sourceTextarea, resultTextarea); }
     function onResultScroll() { syncScroll(resultTextarea, sourceTextarea); }
-
     function attachScrollSync() {
         sourceTextarea.removeEventListener('scroll', onSourceScroll);
         resultTextarea.removeEventListener('scroll', onResultScroll);
         sourceTextarea.addEventListener('scroll', onSourceScroll);
         resultTextarea.addEventListener('scroll', onResultScroll);
     }
-
     function updateSyncMode() {
         currentSyncMode = syncScrollSelect.value;
         localStorage.setItem(STORAGE_SYNC_MODE, currentSyncMode);
-        // 可选：提示用户
-        let modeText = '';
-        if (currentSyncMode === 'off') modeText = '关闭';
-        else if (currentSyncMode === 'pixel') modeText = '像素同步';
-        else modeText = '比例同步';
+        let modeText = currentSyncMode === 'off' ? '关闭' : (currentSyncMode === 'pixel' ? '像素同步' : '比例同步');
         showInfoMessage(`滚动同步已切换为：${modeText}`);
     }
 
@@ -1269,18 +1466,32 @@
         attachScrollSync();
     }
 
+    // 初始加载
     customRules = [];
     renderCustomTable();
     saveCustomRulesToLocal();
     if (autoLoadSnapshot.checked) {
         const snap = loadSnapshotFromLocal();
-        if (snap) { applyFullConfig(snap, false); showInfoMessage('已加载上次快照'); }
+        if (snap) { 
+            applyFullConfig(snap, false); 
+            showInfoMessage('已加载上次快照'); 
+        } else {
+            // 没有快照但有独立列宽存储则恢复
+            if (currentColumnWidths.length) {
+                setTimeout(() => applyColumnWidths(currentColumnWidths), 50);
+                initResizableColumns();
+            }
+        }
     } else {
         showInfoMessage('自动加载快照已关闭，可手动保存/加载配置');
+        if (currentColumnWidths.length) {
+            setTimeout(() => applyColumnWidths(currentColumnWidths), 50);
+            initResizableColumns();
+        }
     }
     bindEvents();
     recordCurrentState();
-    showInfoMessage('V8.3.0 — 新增同步滚动（比例/像素/关闭），增强手机交互');
+    showInfoMessage('V8.4.0 — 新增列宽拖拽可调并持久化，搜索栏对比度优化，按钮布局更舒适');
 })();
 </script>
 </body>
