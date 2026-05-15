@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>TextPro 文本净化工具 V8.4.0 · 列宽可调+交互增强</title>
+    <title>TextPro 文本净化工具 V8.5.0 · 列宽可调+交互增强+手机适配</title>
     <style>
         * {
             box-sizing: border-box;
@@ -52,6 +52,7 @@
             padding: 20px 16px;
             transition: background 0.2s, color 0.2s;
             color: var(--text-primary);
+            touch-action: pan-x pan-y; /* 保留滚动，不影响拖拽 */
         }
         .app-container {
             max-width: 1600px;
@@ -105,6 +106,8 @@
             color: var(--text-primary);
             resize: vertical;
             transition: border 0.2s, box-shadow 0.2s;
+            -webkit-appearance: none;
+            appearance: none;
         }
         textarea::selection {
             background: #ffeb3b !important;
@@ -148,6 +151,7 @@
             background: var(--input-bg);
             font-size: 0.9rem;
             color: var(--text-primary);
+            -webkit-appearance: none;
         }
         .search-case-label {
             display: inline-flex;
@@ -228,6 +232,7 @@
             min-height: 44px;
             padding: 0 6px;
             color: var(--text-primary);
+            touch-action: manipulation;
         }
         .loop-control {
             display: inline-flex;
@@ -277,6 +282,7 @@
             border: 1px solid #fde047;
             background: white;
             color: #1e1a0c;
+            -webkit-appearance: none;
         }
         body.dark .quick-replace-bar input {
             background: #1e293b;
@@ -291,6 +297,7 @@
             border-radius: 44px;
             font-weight: 600;
             min-height: 44px;
+            touch-action: manipulation;
         }
         .quick-replace-bar button:hover {
             background: #ca8a04;
@@ -310,6 +317,7 @@
             gap: 6px;
             min-height: 44px;
             box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            touch-action: manipulation;
         }
         button.primary {
             background: #0f6b8c;
@@ -350,6 +358,14 @@
         body.dark .badge {
             background: #334155;
         }
+        .scrollable-table {
+            max-height: 480px;
+            overflow-x: auto;
+            overflow-y: auto;
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            -webkit-overflow-scrolling: touch;
+        }
         .rule-table {
             width: 100%;
             border-collapse: collapse;
@@ -357,9 +373,9 @@
             font-size: 13px;
             border: 1px solid var(--table-border);
             border-radius: 20px;
-            overflow: hidden;
             table-layout: fixed;
             color: var(--text-primary);
+            min-width: 700px; /* 手机横向滚动 */
         }
         .rule-table th, .rule-table td {
             border: 1px solid var(--table-border);
@@ -381,7 +397,7 @@
         .rule-table th:nth-child(5) { width: 16%; min-width: 130px; }
         .rule-table th:nth-child(6) { width: 28%; min-width: 200px; }
         .rule-table th:nth-child(7) { width: 26%; min-width: 180px; }
-        .rule-table th:nth-child(8) { width: 200px; }  /* 操作列增加宽度 */
+        .rule-table th:nth-child(8) { width: 200px; }
         .rule-table td:nth-child(5) input,
         .rule-table td:nth-child(6) input,
         .rule-table td:nth-child(7) input {
@@ -394,6 +410,7 @@
             border: 1px solid var(--input-border);
             background: var(--input-bg);
             color: var(--text-primary);
+            -webkit-appearance: none;
         }
         .rule-table td:nth-child(8) {
             text-align: left;
@@ -419,8 +436,10 @@
             gap: 2px;
             font-weight: 500;
             white-space: nowrap;
-            min-width: 32px;
+            min-width: 44px;
             justify-content: center;
+            min-height: 36px;
+            touch-action: manipulation;
         }
         body.dark .icon-btn {
             background: #334155;
@@ -434,15 +453,15 @@
         .icon-btn.top-btn, .icon-btn.bottom-btn { background: #e9f0fa; border-color: #bdd3f0; color: #1e4a76; }
         body.dark .icon-btn.top-btn, body.dark .icon-btn.bottom-btn { background: #1e3a8a; border-color: #60a5fa; color: #bfdbfe; }
         .icon-btn:hover { filter: brightness(0.96); transform: translateY(-1px); }
-        /* 搜索栏内导航按钮单独加强 */
         .icon-btn.nav-btn, .icon-btn.clear-btn {
             background: #ffffff;
             border: 1px solid #b9cfdf;
             color: #1f5e7e;
             border-radius: 28px;
             padding: 5px 10px;
-            min-width: 38px;
+            min-width: 44px;
             box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            min-height: 36px;
         }
         body.dark .icon-btn.nav-btn, body.dark .icon-btn.clear-btn {
             background: #1e293b;
@@ -457,7 +476,6 @@
             background: #334155;
             border-color: #60a5fa;
         }
-        /* 列宽拖拽把手 */
         .resizer {
             position: absolute;
             top: 0;
@@ -468,15 +486,10 @@
             background: transparent;
             z-index: 10;
             transition: background 0.1s;
+            touch-action: none; /* 手机拖拽时不滚动页面 */
         }
         .resizer:hover {
             background: var(--resize-handle-color);
-        }
-        .scrollable-table {
-            max-height: 480px;
-            overflow-y: auto;
-            border: 1px solid var(--card-border);
-            border-radius: 20px;
         }
         .table-toolbar {
             display: flex;
@@ -498,6 +511,7 @@
             align-items: center;
             gap: 8px;
             user-select: none;
+            touch-action: manipulation;
         }
         body.dark .help-summary {
             color: #93c5fd;
@@ -532,10 +546,11 @@
             .rule-table th, .rule-table td { padding: 6px 3px; font-size: 11px; }
             .rule-table input[type="text"] { font-size: 10px; padding: 4px; }
             .action-buttons { gap: 4px; flex-wrap: wrap; }
-            .icon-btn { padding: 4px 6px; font-size: 10px; min-width: 32px; }
+            .icon-btn { padding: 4px 6px; font-size: 10px; min-width: 40px; }
             .global-control-bar { flex-direction: column; align-items: stretch; }
             .quick-replace-bar { flex-direction: column; align-items: stretch; }
             .safety-option { margin-left: 0; justify-content: center; margin-top: 8px; }
+            button { padding: 6px 16px; font-size: 0.85rem; }
         }
         .warning-badge {
             background: #fff3e0;
@@ -576,6 +591,7 @@
             background: var(--header-bg);
             color: var(--text-primary);
             border: none;
+            min-height: 44px;
         }
         .template-panel button:hover {
             background: var(--info-bar-bg);
@@ -597,6 +613,7 @@
             min-height: 44px;
             margin-left: 8px;
             transition: all 0.2s;
+            touch-action: manipulation;
         }
         .sync-select:hover {
             border-color: #3b82f6;
@@ -820,14 +837,13 @@
     const resultSearchClear = document.getElementById('resultSearchClear');
 
     let customRules = [];
-    const STORAGE_KEY_RULES = 'textpro_custom_rules_v84';
-    const STORAGE_SNAPSHOT_KEY = 'textpro_full_workspace_v84';
+    const STORAGE_KEY_RULES = 'textpro_custom_rules_v85';
+    const STORAGE_SNAPSHOT_KEY = 'textpro_full_workspace_v85';
     const STORAGE_AUTO_LOAD = 'textpro_auto_load_snapshot';
     const STORAGE_DARK_MODE = 'textpro_dark_mode';
     const STORAGE_SYNC_MODE = 'textpro_sync_mode';
-    const STORAGE_COLUMN_WIDTHS = 'textpro_column_widths'; // 单独存储列宽，优先级高于快照
+    const STORAGE_COLUMN_WIDTHS = 'textpro_column_widths';
 
-    // 全局列宽存储
     let currentColumnWidths = [];
 
     try {
@@ -845,7 +861,6 @@
         } else {
             syncScrollSelect.value = 'proportion';
         }
-        // 读取之前保存的列宽
         const savedWidths = localStorage.getItem(STORAGE_COLUMN_WIDTHS);
         if (savedWidths) {
             try {
@@ -987,7 +1002,6 @@
         currentColumnWidths = widths;
         try {
             localStorage.setItem(STORAGE_COLUMN_WIDTHS, JSON.stringify(widths));
-            // 同时更新全局配置快照中的列宽
             const cfg = getCurrentFullConfig();
             cfg.columnWidths = widths;
             saveSnapshotToLocal(cfg);
@@ -1007,13 +1021,11 @@
     function initResizableColumns() {
         const ths = document.querySelectorAll('#customRuleTable th');
         if (ths.length === 0) return;
-        // 移除旧的 resizer 避免重复
         ths.forEach(th => {
             const oldResizer = th.querySelector('.resizer');
             if (oldResizer) oldResizer.remove();
         });
-        ths.forEach((th, idx) => {
-            // 最后一列（操作列）也可以调整，但为了方便，全部加上拖拽
+        ths.forEach((th) => {
             const resizer = document.createElement('div');
             resizer.className = 'resizer';
             th.style.position = 'relative';
@@ -1030,7 +1042,6 @@
                 document.body.style.userSelect = 'none';
                 document.addEventListener('mousemove', onMouseMove);
                 document.addEventListener('mouseup', onMouseUp);
-                // 移动端触摸
                 document.addEventListener('touchmove', onTouchMove, { passive: false });
                 document.addEventListener('touchend', onTouchEnd);
             };
@@ -1041,7 +1052,6 @@
                 let newWidth = startWidth + dx;
                 if (newWidth < 40) newWidth = 40;
                 th.style.width = newWidth + 'px';
-                // 实时调整表格布局
                 const table = document.getElementById('customRuleTable');
                 if (table) table.style.width = '100%';
             };
@@ -1107,10 +1117,9 @@
             try {
                 localStorage.setItem(STORAGE_COLUMN_WIDTHS, JSON.stringify(currentColumnWidths));
             } catch(e) {}
-            // 等待表格渲染完成后再应用列宽
             setTimeout(() => {
                 applyColumnWidths(currentColumnWidths);
-                initResizableColumns(); // 重新绑定拖拽
+                initResizableColumns();
             }, 20);
         }
         if (saveSnapshotFlag) saveSnapshotToLocal(getCurrentFullConfig());
@@ -1153,7 +1162,6 @@
             tdAct.append(upBtn, downBtn, topBtn, bottomBtn, delBtn); tr.appendChild(tdAct);
             tbody.appendChild(tr);
         });
-        // 渲染完成后恢复列宽并重新绑定拖拽
         setTimeout(() => {
             if (currentColumnWidths && currentColumnWidths.length) {
                 applyColumnWidths(currentColumnWidths);
@@ -1426,9 +1434,39 @@
         darkModeToggle.textContent = isDark ? '☀️ 亮色' : '🌙 暗色';
     }
 
+    // 自动重命名时间戳函数 (格式: YYYY-MM-DD_THH_MM_SS)
+    function getCustomTimestamp() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        return `${year}-${month}-${day}_T${hours}_${minutes}_${seconds}`;
+    }
+
     function bindEvents() {
         importBtn.onclick = () => { let i=document.createElement('input'); i.type='file'; i.accept='.txt'; i.onchange=e=>{ let f=e.target.files[0]; if(f){ let r=new FileReader(); r.onload=ev=>{ sourceTextarea.value=ev.target.result; showInfoMessage(`已导入 ${f.name}`); }; r.readAsText(f,'UTF-8'); } }; i.click(); };
-        exportBtn.onclick = () => { let content=resultTextarea.value; if(!content) return alert('结果为空'); let blob=new Blob([content],{type:'text/plain'}); let a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='textpro_output.txt'; a.click(); URL.revokeObjectURL(a.href); };
+        
+        // 导出文本文件: 自动重命名为 自定义替换表_时间戳.txt
+        exportBtn.onclick = () => {
+            let content = resultTextarea.value;
+            if (!content) {
+                if (sourceTextarea.value) content = sourceTextarea.value;
+                else return alert('没有可导出的文本');
+            }
+            const timestamp = getCustomTimestamp();
+            const fileName = `自定义替换表_${timestamp}.txt`;
+            const blob = new Blob([content], { type: 'text/plain' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = fileName;
+            a.click();
+            URL.revokeObjectURL(a.href);
+            showInfoMessage(`已导出：${fileName}`);
+        };
+        
         copySourceBtn.onclick = () => { navigator.clipboard?.writeText(sourceTextarea.value); showInfoMessage('源文本已复制'); };
         copyResultBtn.onclick = () => { navigator.clipboard?.writeText(resultTextarea.value); showInfoMessage('结果已复制'); };
         clearAllBtn.onclick = () => { sourceTextarea.value=''; resultTextarea.value=''; resultTextarea.dispatchEvent(new Event('input')); showInfoMessage('已清空'); };
@@ -1439,7 +1477,21 @@
         batchRunCheckedBtn.onclick = () => { recordCurrentState(); batchRunCheckedRules(); };
         selectAllRulesBtn.onclick = () => selectAllRunChecks(true);
         deselectAllRulesBtn.onclick = () => selectAllRunChecks(false);
-        exportFullConfigBtn.onclick = () => { const cfg = getCurrentFullConfig(); const blob = new Blob([JSON.stringify(cfg,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='textpro_config.json'; a.click(); URL.revokeObjectURL(a.href); showInfoMessage('配置已导出'); };
+        
+        // 导出配置 JSON: 自动重命名为 自定义替换表_时间戳.json
+        exportFullConfigBtn.onclick = () => {
+            const cfg = getCurrentFullConfig();
+            const timestamp = getCustomTimestamp();
+            const fileName = `自定义替换表_${timestamp}.json`;
+            const blob = new Blob([JSON.stringify(cfg, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = fileName;
+            a.click();
+            URL.revokeObjectURL(a.href);
+            showInfoMessage(`配置已导出：${fileName}`);
+        };
+        
         importFullConfigBtn.onclick = () => { const inp=document.createElement('input'); inp.type='file'; inp.accept='.json'; inp.onchange=e=>{ if(e.target.files[0]){ const reader=new FileReader(); reader.onload=ev=>{ try{ const cfg=JSON.parse(ev.target.result); if(cfg && (cfg.customRules||cfg.globalFlags)){ if(confirm('导入将覆盖当前配置，是否继续？')){ applyFullConfig(cfg,true); showInfoMessage('导入成功'); } } else throw new Error(); } catch(err){ alert('无效配置文件'); } }; reader.readAsText(e.target.files[0]); } }; inp.click(); };
         saveSnapshotBtn.onclick = () => { saveSnapshotToLocal(getCurrentFullConfig()); showInfoMessage('快照已保存'); };
         sourceTextarea.addEventListener('input', () => setTimeout(recordCurrentState,300));
@@ -1476,7 +1528,6 @@
             applyFullConfig(snap, false); 
             showInfoMessage('已加载上次快照'); 
         } else {
-            // 没有快照但有独立列宽存储则恢复
             if (currentColumnWidths.length) {
                 setTimeout(() => applyColumnWidths(currentColumnWidths), 50);
                 initResizableColumns();
@@ -1491,7 +1542,7 @@
     }
     bindEvents();
     recordCurrentState();
-    showInfoMessage('V8.4.0 — 新增列宽拖拽可调并持久化，搜索栏对比度优化，按钮布局更舒适');
+    showInfoMessage('V8.5.0 — 导出自动命名、手机交互增强、列宽拖拽优化');
 })();
 </script>
 </body>
