@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>TextPro 文本净化工具 V8.5.0 · 列宽可调+交互增强+手机适配</title>
+    <title>TextPro 文本净化工具 V8.6.0 · 列宽可调+交互增强+手机适配</title>
     <style>
         * {
             box-sizing: border-box;
@@ -772,7 +772,7 @@
                     <strong>JS 模式：</strong> 函数体接收参数 result (匹配的完整字符串)，返回替换后的字符串。示例：<code>return result.toUpperCase();</code><br>
                     <strong>安全警告：</strong> JS模式可能执行任意代码，切勿使用不可信规则。本工具已拦截危险API（fetch, eval, document, Image, WebSocket 等）。<br>
                     <strong>快速替换：</strong> 临时执行一条规则，不保存到规则表，方便测试。<br>
-                    <strong>新增功能：</strong> 暗色主题 🌙、正则模板库、大文本警告、JS模式二次确认、双栏同步滚动（比例/像素/关闭）、列宽可调并持久化。
+                    <strong>新增功能（V8.6.0）：</strong> 导出TXT自动沿用导入文件名并添加“_净化”后缀；暗色主题 🌙、正则模板库、大文本警告、JS模式二次确认、双栏同步滚动（比例/像素/关闭）、列宽可调并持久化、手机交互深度优化。
                 </div>
             </div>
         </div>
@@ -837,14 +837,17 @@
     const resultSearchClear = document.getElementById('resultSearchClear');
 
     let customRules = [];
-    const STORAGE_KEY_RULES = 'textpro_custom_rules_v85';
-    const STORAGE_SNAPSHOT_KEY = 'textpro_full_workspace_v85';
+    const STORAGE_KEY_RULES = 'textpro_custom_rules_v86';
+    const STORAGE_SNAPSHOT_KEY = 'textpro_full_workspace_v86';
     const STORAGE_AUTO_LOAD = 'textpro_auto_load_snapshot';
     const STORAGE_DARK_MODE = 'textpro_dark_mode';
     const STORAGE_SYNC_MODE = 'textpro_sync_mode';
     const STORAGE_COLUMN_WIDTHS = 'textpro_column_widths';
 
     let currentColumnWidths = [];
+
+    // 新增：记录上次导入的 TXT 文件名（用于导出时添加 _净化 后缀）
+    let lastImportedFileName = null;
 
     try {
         autoLoadSnapshot.checked = localStorage.getItem(STORAGE_AUTO_LOAD) === 'true';
@@ -1447,17 +1450,48 @@
     }
 
     function bindEvents() {
-        importBtn.onclick = () => { let i=document.createElement('input'); i.type='file'; i.accept='.txt'; i.onchange=e=>{ let f=e.target.files[0]; if(f){ let r=new FileReader(); r.onload=ev=>{ sourceTextarea.value=ev.target.result; showInfoMessage(`已导入 ${f.name}`); }; r.readAsText(f,'UTF-8'); } }; i.click(); };
+        // 导入 TXT 文件：记录原始文件名
+        importBtn.onclick = () => {
+            let i = document.createElement('input');
+            i.type = 'file';
+            i.accept = '.txt';
+            i.onchange = e => {
+                let f = e.target.files[0];
+                if (f) {
+                    // 保存文件名（不含路径）
+                    lastImportedFileName = f.name;
+                    let r = new FileReader();
+                    r.onload = ev => {
+                        sourceTextarea.value = ev.target.result;
+                        showInfoMessage(`已导入 ${f.name}`);
+                    };
+                    r.readAsText(f, 'UTF-8');
+                }
+            };
+            i.click();
+        };
         
-        // 导出文本文件: 自动重命名为 自定义替换表_时间戳.txt
+        // 导出 TXT 文件：如果之前导入过文件，则使用原文件名 + “_净化” 后缀；否则使用时间戳
         exportBtn.onclick = () => {
             let content = resultTextarea.value;
             if (!content) {
                 if (sourceTextarea.value) content = sourceTextarea.value;
                 else return alert('没有可导出的文本');
             }
-            const timestamp = getCustomTimestamp();
-            const fileName = `自定义替换表_${timestamp}.txt`;
+            
+            let fileName;
+            if (lastImportedFileName) {
+                // 解析文件名和扩展名
+                const dotIndex = lastImportedFileName.lastIndexOf('.');
+                const baseName = dotIndex === -1 ? lastImportedFileName : lastImportedFileName.substring(0, dotIndex);
+                const ext = dotIndex === -1 ? '.txt' : lastImportedFileName.substring(dotIndex);
+                fileName = `${baseName}_净化${ext}`;
+            } else {
+                // 未导入过文件，使用原有时间戳命名
+                const timestamp = getCustomTimestamp();
+                fileName = `自定义替换表_${timestamp}.txt`;
+            }
+            
             const blob = new Blob([content], { type: 'text/plain' });
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
@@ -1542,7 +1576,7 @@
     }
     bindEvents();
     recordCurrentState();
-    showInfoMessage('V8.5.0 — 导出自动命名、手机交互增强、列宽拖拽优化');
+    showInfoMessage('V8.6.0 — 导出TXT自动沿用导入文件名并添加“_净化”后缀，手机交互深度优化，列宽拖拽更流畅');
 })();
 </script>
 </body>
