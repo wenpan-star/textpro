@@ -2,11 +2,12 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>TextPro 正则工具箱 · 专业文本净化 · 安全增强版</title>
     <style>
         * {
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
         body {
             background: #eef2f7;
@@ -53,7 +54,7 @@
         textarea {
             width: 100%;
             font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
-            font-size: 13px;
+            font-size: 16px; /* 避免iOS缩放 */
             line-height: 1.5;
             border: 1px solid #cbdde9;
             border-radius: 20px;
@@ -89,11 +90,11 @@
         .search-bar input[type="text"] {
             flex: 1;
             min-width: 140px;
-            padding: 7px 14px;
+            padding: 8px 14px;
             border-radius: 60px;
             border: 1px solid #cbdde9;
             background: #fff;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             font-family: inherit;
             transition: 0.2s;
         }
@@ -101,7 +102,7 @@
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             font-weight: 500;
             color: #475569;
             cursor: pointer;
@@ -109,14 +110,14 @@
             user-select: none;
         }
         .search-count {
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             font-weight: 600;
             color: #475569;
             background: #e6f0f9;
-            padding: 4px 10px;
+            padding: 4px 12px;
             border-radius: 60px;
             white-space: nowrap;
-            min-width: 42px;
+            min-width: 50px;
             text-align: center;
             transition: 0.2s;
         }
@@ -132,16 +133,18 @@
             flex-shrink: 0;
             background: #f0f2f5;
             border: 1px solid #cbd5e1;
-            border-radius: 20px;
-            padding: 5px 10px;
+            border-radius: 28px;
+            padding: 6px 12px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 14px;
             transition: all 0.2s;
             display: inline-flex;
             align-items: center;
             gap: 2px;
             font-weight: 500;
             white-space: nowrap;
+            min-width: 44px;
+            justify-content: center;
         }
         .search-bar .icon-btn:hover {
             background: #e2e8f0;
@@ -167,27 +170,23 @@
             border-color: #ff7a5c;
         }
 
-        .regex-bar {
+        /* 全局控制栏：标志组 + 循环选项 */
+        .global-control-bar {
             display: flex;
             flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
             gap: 16px;
             margin-bottom: 20px;
-            align-items: flex-end;
-        }
-        .regex-field {
-            flex: 2;
-        }
-        .replacement-field {
-            flex: 1.5;
+            padding: 10px 16px;
+            background: #f1f5f9;
+            border-radius: 48px;
         }
         .flag-group {
             display: flex;
             gap: 12px;
-            background: #f1f5f9;
-            padding: 8px 18px;
-            border-radius: 48px;
-            align-items: center;
             flex-wrap: wrap;
+            align-items: center;
         }
         .flag-group label {
             display: inline-flex;
@@ -195,6 +194,16 @@
             gap: 6px;
             font-weight: 500;
             cursor: pointer;
+            min-height: 44px;
+            padding: 0 6px;
+        }
+        .loop-control {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #e9eef3;
+            padding: 6px 16px;
+            border-radius: 40px;
         }
         button {
             background: #1f5e7e;
@@ -203,12 +212,13 @@
             font-weight: 500;
             padding: 8px 22px;
             border-radius: 44px;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             cursor: pointer;
             transition: 0.2s;
             display: inline-flex;
             align-items: center;
             gap: 6px;
+            min-height: 44px;
         }
         button.primary {
             background: #0f6b8c;
@@ -224,21 +234,6 @@
         }
         button.outline:hover {
             background: #eaf3fc;
-        }
-        .preset-row {
-            margin-top: 12px;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 12px;
-        }
-        select,
-        input {
-            padding: 8px 14px;
-            border-radius: 60px;
-            border: 1px solid #cbdde9;
-            background: white;
-            font-size: 0.85rem;
         }
         .info-bar {
             background: #eef2fa;
@@ -261,53 +256,32 @@
             width: 100%;
             border-collapse: collapse;
             background: white;
-            font-size: 12px;
+            font-size: 13px;
             border: 1px solid #d4dce6;
-            border-radius: 12px;
+            border-radius: 16px;
             overflow: hidden;
             table-layout: fixed;
         }
         .rule-table th,
         .rule-table td {
             border: 1px solid #e0e6ef;
-            padding: 8px 6px;
+            padding: 10px 8px;
             vertical-align: middle;
         }
         .rule-table th {
             background: #f2f6fb;
             font-weight: 600;
-            font-size: 12px;
+            font-size: 13px;
         }
-        /* 优化列宽，保证操作栏按钮在一行 */
-        .rule-table th:nth-child(1) {
-            width: 48px;
-        }   /* 运行 */
-        .rule-table th:nth-child(2) {
-            width: 48px;
-        }   /* 正则 */
-        .rule-table th:nth-child(3) {
-            width: 58px;
-        }   /* JS模式 */
-        .rule-table th:nth-child(4) {
-            width: 50px;
-        }   /* 序号 */
-        .rule-table th:nth-child(5) {
-            width: 16%;
-            min-width: 130px;
-        }   /* 规则名称 */
-        .rule-table th:nth-child(6) {
-            width: 28%;
-            min-width: 200px;
-        }   /* 正则表达式 */
-        .rule-table th:nth-child(7) {
-            width: 26%;
-            min-width: 180px;
-        }   /* 替换文本 */
-        .rule-table th:nth-child(8) {
-            width: 180px;
-        }   /* 操作栏：加宽并允许按钮不换行 */
+        .rule-table th:nth-child(1) { width: 48px; }
+        .rule-table th:nth-child(2) { width: 48px; }
+        .rule-table th:nth-child(3) { width: 60px; }
+        .rule-table th:nth-child(4) { width: 55px; }
+        .rule-table th:nth-child(5) { width: 16%; min-width: 130px; }
+        .rule-table th:nth-child(6) { width: 28%; min-width: 200px; }
+        .rule-table th:nth-child(7) { width: 26%; min-width: 180px; }
+        .rule-table th:nth-child(8) { width: 180px; }
 
-        /* 规则名称、正则、替换文本所在单元格：让输入框水平居中（保持原大小） */
         .rule-table td:nth-child(5),
         .rule-table td:nth-child(6),
         .rule-table td:nth-child(7) {
@@ -321,41 +295,41 @@
             margin: 0 auto;
             font-family: monospace;
             font-size: 12px;
-            padding: 6px 8px;
-            border-radius: 12px;
+            padding: 8px 8px;
+            border-radius: 14px;
             border: 1px solid #cbdde9;
             box-sizing: border-box;
             text-align: left;
         }
-        /* 操作栏单元格内部按钮组强制一行显示，且整体向左移动（取消居中，改为靠左） */
         .rule-table td:nth-child(8) {
             text-align: left;
-            padding: 6px 4px;
+            padding: 8px 4px;
         }
         .action-buttons {
             display: flex;
-            gap: 5px;
+            gap: 6px;
             flex-wrap: nowrap;
             justify-content: flex-start;
             align-items: center;
         }
         .rule-check {
             text-align: center;
-            width: 45px;
         }
         .icon-btn {
             background: #f0f2f5;
             border: 1px solid #cbd5e1;
-            border-radius: 20px;
-            padding: 4px 8px;
+            border-radius: 28px;
+            padding: 6px 12px;
             cursor: pointer;
-            font-size: 11px;
+            font-size: 13px;
             transition: all 0.2s;
             display: inline-flex;
             align-items: center;
             gap: 2px;
             font-weight: 500;
             white-space: nowrap;
+            min-width: 44px;
+            justify-content: center;
         }
         .icon-btn.move-up,
         .icon-btn.move-down {
@@ -388,7 +362,7 @@
             background: #cddff5;
         }
         .scrollable-table {
-            max-height: 450px;
+            max-height: 480px;
             overflow-y: auto;
             border: 1px solid #e2e8f0;
             border-radius: 16px;
@@ -397,17 +371,9 @@
         .table-toolbar {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
             flex-wrap: wrap;
             gap: 12px;
-        }
-        .js-badge {
-            background: #e9d4ff;
-            color: #6b21a5;
-            border-radius: 12px;
-            padding: 2px 6px;
-            font-size: 10px;
-            margin-left: 4px;
         }
         .warning-badge {
             background: #fff3e0;
@@ -418,41 +384,73 @@
             margin-left: 8px;
             cursor: help;
         }
-
         @media (max-width: 780px) {
+            body {
+                padding: 12px;
+            }
             .card-body {
                 padding: 1rem;
             }
-            .rule-table th,
-            .rule-table td {
-                padding: 4px;
+            .card-header {
+                padding: 0.8rem 1rem;
+                flex-direction: column;
+                align-items: stretch;
             }
-            .search-bar {
-                gap: 5px;
-                padding: 6px 10px;
+            .rule-table th, .rule-table td {
+                padding: 8px 4px;
+                font-size: 11px;
+            }
+            .rule-table input[type="text"] {
+                font-size: 11px;
+                padding: 6px 4px;
             }
             .action-buttons {
-                gap: 3px;
+                gap: 4px;
+                flex-wrap: wrap;
             }
             .icon-btn {
-                padding: 3px 6px;
-                font-size: 10px;
-            }
-            .rule-table th:nth-child(8) {
-                width: 150px;
-            }
-            .rule-table td:nth-child(5) input,
-            .rule-table td:nth-child(6) input,
-            .rule-table td:nth-child(7) input {
-                width: 94%;
+                padding: 5px 8px;
                 font-size: 11px;
-                padding: 4px 4px;
+                min-width: 38px;
+            }
+            button, select, input {
+                min-height: 44px;
+            }
+            .search-bar .icon-btn {
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+            .table-toolbar button {
+                font-size: 0.75rem;
+                padding: 6px 12px;
+            }
+            .global-control-bar {
+                flex-direction: column;
+                align-items: stretch;
+                border-radius: 28px;
+            }
+            .flag-group {
+                justify-content: center;
+            }
+            .loop-control {
+                justify-content: center;
+            }
+        }
+        @media (max-width: 480px) {
+            .rule-table th:nth-child(5) { min-width: 100px; }
+            .rule-table th:nth-child(6) { min-width: 150px; }
+            .rule-table th:nth-child(7) { min-width: 140px; }
+            .rule-table th:nth-child(8) { width: 150px; }
+            .action-buttons .icon-btn {
+                padding: 4px 6px;
+                font-size: 10px;
             }
         }
     </style>
 </head>
 <body>
 <div class="app-container">
+    <!-- 卡片1：源文本 / 结果文本 -->
     <div class="card">
         <div class="card-header">
             <span>🧹 TextPro 正则工具箱 · 文本净化/批量替换 <span class="warning-badge" title="JS模式下可执行自定义代码，请仅使用可信规则">⚠️ 安全提醒</span></span>
@@ -493,61 +491,26 @@
         </div>
     </div>
 
-    <div class="card">
-        <div class="card-header">
-            <span>⚙️ 正则表达式 / 替换规则</span>
-            <span class="badge">支持捕获组 $1..$n | JS模式独立控制 | 替换框支持 \n \r \t \\ 转义(普通模式)</span>
-        </div>
-        <div class="card-body">
-            <div class="regex-bar">
-                <div class="regex-field">
-                    <label style="font-size:0.7rem;">📐 正则表达式 (Pattern)</label>
-                    <input type="text" id="regexInput" placeholder="例如: ^.*(版主提醒|版主评語).*$" value="">
-                </div>
-                <div class="replacement-field">
-                    <label style="font-size:0.7rem;">✏️ 替换为 (Replacement)</label>
-                    <input type="text" id="replacementInput" placeholder="普通模式支持转义 \n \r \t ; JS模式下为函数体" value="">
-                </div>
-                <div class="flag-group">
-                    <label><input type="checkbox" id="flagG" checked> 全局(g)</label>
-                    <label><input type="checkbox" id="flagI"> 忽略大小写(i)</label>
-                    <label><input type="checkbox" id="flagM"> 多行(m)</label>
-                    <label style="background:#e9d4ff; border-radius:20px; padding:0 8px;"><input type="checkbox" id="topJsMode"> 🧩 JS模式</label>
-                </div>
-                <div><button id="applyRegexBtn" class="primary">▶ 执行替换</button></div>
-            </div>
-            <div class="preset-row">
-                <span>📚 预设规则：</span>
-                <select id="presetSelect">
-                    <option value="">-- 选择预设规则 --</option>
-                    <option value="del_ads">删除常见广告/版主/作者行</option>
-                    <option value="del_ticket">删除括号内【求票/打赏】内容</option>
-                    <option value="del_daixu">删除（待续）以及各类括号待续</option>
-                    <option value="merge_internal">合并段落内换行 (单换行合并)</option>
-                    <option value="compress_empty">压缩多余空行 (多个空行→单个)</option>
-                    <option value="del_blank_lines">删除所有空行</option>
-                    <option value="clean_brackets">移除圆括号/方括号内“待续/求票”</option>
-                </select>
-                <button id="loadPresetBtn">载入此规则</button>
-                <button id="resetToDefaultBtn" class="outline">恢复默认(删广告行)</button>
-                <label style="margin-left: auto;">
-                    <input type="checkbox" id="loopUntilStable"> 🔁 循环执行直到文本稳定
-                </label>
-            </div>
-            <div class="info-bar">
-                <span>💡 提示：</span>
-                <span>• “合并段落内换行” 建议勾选循环执行；JS模式: 函数体接收参数 result (匹配到的完整字符串) 并返回替换内容。</span>
-                <span>• 自定义规则表新增【置顶】【置底】按钮，输入框宽度已优化，初始规则表为空白，可通过导入完整配置或重置默认规则填充。</span>
-            </div>
-        </div>
-    </div>
-
+    <!-- 卡片2：自定义替换表 + 全局控制栏（原顶部正则/替换已移除） -->
     <div class="card">
         <div class="card-header">
             <span>📋 自定义替换表（顺序批量运行）</span>
             <span class="badge">支持上移/下移/置顶/置底 | 独立正则/JS模式切换 | 可保存工作区配置</span>
         </div>
         <div class="card-body">
+            <!-- 全局控制栏：标志组 + 循环执行 -->
+            <div class="global-control-bar">
+                <div class="flag-group">
+                    <label><input type="checkbox" id="flagG" checked> 全局(g)</label>
+                    <label><input type="checkbox" id="flagI"> 忽略大小写(i)</label>
+                    <label><input type="checkbox" id="flagM"> 多行(m)</label>
+                    <label style="background:#e9d4ff; border-radius:28px; padding:0 12px;"><input type="checkbox" id="topJsMode"> 🧩 JS模式</label>
+                </div>
+                <div class="loop-control">
+                    <label><input type="checkbox" id="loopUntilStable"> 🔁 循环执行直到文本稳定</label>
+                </div>
+            </div>
+
             <div class="table-toolbar">
                 <div>
                     <button id="addRuleBtn" class="outline">➕ 添加规则</button>
@@ -562,6 +525,7 @@
                     <button id="deselectAllRulesBtn" class="outline">☐ 全不选</button>
                 </div>
             </div>
+
             <div class="scrollable-table">
                 <table class="rule-table" id="customRuleTable">
                     <thead>
@@ -572,7 +536,8 @@
             </div>
             <div class="info-bar" style="margin-top: 16px;">
                 <span>✅ 【JS模式】勾选时替换文本作为JavaScript函数体（入参result → 返回替换字符串）。不勾选则普通替换。</span>
-                <span>🔧 “保存当前配置快照”将完整保存顶部正则设置、标志、循环选项以及整个替换表(含勾选状态)，页面自动恢复上次快照。</span>
+                <span>🔧 保存快照将完整保存当前所有规则、勾选状态、全局标志及循环选项。导出配置采用JSON格式。</span>
+                <span>📱 已针对手机浏览器优化触摸区域，按钮大小适配移动端。</span>
             </div>
         </div>
     </div>
@@ -583,17 +548,11 @@
     // ======================= DOM 元素引用 =======================
     const sourceTextarea = document.getElementById('sourceText');
     const resultTextarea = document.getElementById('resultText');
-    const regexInput = document.getElementById('regexInput');
-    const replacementInput = document.getElementById('replacementInput');
     const flagG = document.getElementById('flagG');
     const flagI = document.getElementById('flagI');
     const flagM = document.getElementById('flagM');
     const topJsMode = document.getElementById('topJsMode');
     const loopUntilStable = document.getElementById('loopUntilStable');
-    const applyRegexBtn = document.getElementById('applyRegexBtn');
-    const presetSelect = document.getElementById('presetSelect');
-    const loadPresetBtn = document.getElementById('loadPresetBtn');
-    const resetToDefaultBtn = document.getElementById('resetToDefaultBtn');
     const importBtn = document.getElementById('importBtn');
     const exportBtn = document.getElementById('exportBtn');
     const copySourceBtn = document.getElementById('copySourceBtn');
@@ -624,7 +583,7 @@
     const STORAGE_KEY_RULES = 'textpro_custom_rules_v3';
     const STORAGE_SNAPSHOT_KEY = 'textpro_full_workspace_snapshot_v3';
 
-    // ======================= 规则标准化函数 =======================
+    // ======================= 规则标准化 =======================
     function normalizeRuleFromImport(rule) {
         const r = { ...rule };
         r.isRegex = r.isRegex !== false;
@@ -641,18 +600,18 @@
         return r;
     }
 
-    // 增强预设规则集 (保留完整版, 用于重置默认规则)
+    // 增强预设规则集 (用于重置默认规则)
     const defaultCustomRulesRaw = [
         { name: "01-清除版主/广告行", pattern: ".*(版主提醒|版主评語|加长回|欢迎来到|推荐票|阅读文章|您的留言|认真回复|作者：|发表于：|首发：|字数：|待续).*", replacement: "", enabled: true, order: 1, runChecked: true, isRegex: true, isJS: false },
         { name: "02-删除括号求票语", pattern: "[([{（［｛【][^\\](){}）］｝】]*?(?:求\\w{0,4}[订推藏]|推荐|码字|月票|打赏|待续)[^\\](){}）］｝】]*?[\\]\\}\\)）］｝】]", replacement: "", enabled: true, order: 2, runChecked: true, isRegex: true, isJS: false },
-        { name: "04-合并段落内换行", pattern: "([^ \\t\\n\\r])\\r?\\n([^ \\t\\n\\r])", replacement: "$1$2", enabled: true, order: 3, runChecked: false, isRegex: true, isJS: false },
-        { name: "06-全角字母数字转半角", pattern: "[０-９Ａ-Ｚａ-ｚ]", replacement: "@js: const map={'０':'0','１':'1','２':'2','３':'3','４':'4','５':'5','６':'6','７':'7','８':'8','９':'9','Ａ':'A','Ｂ':'B','Ｃ':'C','Ｄ':'D','Ｅ':'E','Ｆ':'F','Ｇ':'G','Ｈ':'H','Ｉ':'I','Ｊ':'J','Ｋ':'K','Ｌ':'L','Ｍ':'M','Ｎ':'N','Ｏ':'O','Ｐ':'P','Ｑ':'Q','Ｒ':'R','Ｓ':'S','Ｔ':'T','Ｕ':'U','Ｖ':'V','Ｗ':'W','Ｘ':'X','Ｙ':'Y','Ｚ':'Z','ａ':'a','ｂ':'b','ｃ':'c','ｄ':'d','ｅ':'e','ｆ':'f','ｇ':'g','ｈ':'h','ｉ':'i','ｊ':'j','ｋ':'k','ｌ':'l','ｍ':'m','ｎ':'n','ｏ':'o','ｐ':'p','ｑ':'q','ｒ':'r','ｓ':'s','ｔ':'t','ｕ':'u','ｖ':'v','ｗ':'w','ｘ':'x','ｙ':'y','ｚ':'z'}; return map[result] || result;", enabled: true, order: 4, runChecked: false, isRegex: true, isJS: true },
+        { name: "03-合并段落内换行", pattern: "([^ \\t\\n\\r])\\r?\\n([^ \\t\\n\\r])", replacement: "$1$2", enabled: true, order: 3, runChecked: false, isRegex: true, isJS: false },
+        { name: "04-全角字母数字转半角", pattern: "[０-９Ａ-Ｚａ-ｚ]", replacement: "@js: const map={'０':'0','１':'1','２':'2','３':'3','４':'4','５':'5','６':'6','７':'7','８':'8','９':'9','Ａ':'A','Ｂ':'B','Ｃ':'C','Ｄ':'D','Ｅ':'E','Ｆ':'F','Ｇ':'G','Ｈ':'H','Ｉ':'I','Ｊ':'J','Ｋ':'K','Ｌ':'L','Ｍ':'M','Ｎ':'N','Ｏ':'O','Ｐ':'P','Ｑ':'Q','Ｒ':'R','Ｓ':'S','Ｔ':'T','Ｕ':'U','Ｖ':'V','Ｗ':'W','Ｘ':'X','Ｙ':'Y','Ｚ':'Z','ａ':'a','ｂ':'b','ｃ':'c','ｄ':'d','ｅ':'e','ｆ':'f','ｇ':'g','ｈ':'h','ｉ':'i','ｊ':'j','ｋ':'k','ｌ':'l','ｍ':'m','ｎ':'n','ｏ':'o','ｐ':'p','ｑ':'q','ｒ':'r','ｓ':'s','ｔ':'t','ｕ':'u','ｖ':'v','ｗ':'w','ｘ':'x','ｙ':'y','ｚ':'z'}; return map[result] || result;", enabled: true, order: 4, runChecked: false, isRegex: true, isJS: true },
         { name: "删除段间换行", pattern: "(?<!\\n)\\n(?!\\n)", replacement: "", enabled: true, order: 5, runChecked: false, isRegex: true, isJS: false },
         { name: "3-6个。→……", pattern: "。{3,6}", replacement: "……", enabled: true, order: 6, runChecked: true, isRegex: true, isJS: false },
         { name: "删除书名《绝望海岛》", pattern: "《绝望海岛》", replacement: "", enabled: true, order: 7, runChecked: false, isRegex: true, isJS: false },
         { name: "两个空格→换行", pattern: "[ \\u3000]{2,7}", replacement: "@js: return \"\\n\";", enabled: true, order: 8, runChecked: true, isRegex: true, isJS: true },
         { name: "第X章前 空一行", pattern: "第([零一二三四五六七八九十百千万亿\\d]+)(?:回|章)[ \\t]*", replacement: "\\n\\n$&", enabled: true, order: 9, runChecked: true, isRegex: true, isJS: false },
-        { name: "05-压缩多余空行", pattern: "\\n\\s*\\n", replacement: "\n", enabled: true, order: 10, runChecked: true, isRegex: true, isJS: false },
+        { name: "压缩多余空行", pattern: "\\n\\s*\\n", replacement: "\n", enabled: true, order: 10, runChecked: true, isRegex: true, isJS: false },
         { name: "删除带括号的书名", pattern: "【[^】]*?(?:大观园记|寻秦记)[^】]*?】", replacement: "", enabled: true, order: 11, runChecked: true, isRegex: true, isJS: false },
         { name: "删除重复行", pattern: "^\\s*(.*?)\\s*$(?:\\r?\\n\\s*\\1\\s*$)+", replacement: "$1", enabled: true, order: 12, runChecked: true, isRegex: true, isJS: false },
         { name: "删除行首/行尾空白及制表符", pattern: "^[ \\t]+|[ \\t]+$", replacement: "", enabled: true, order: 13, runChecked: true, isRegex: true, isJS: false }
@@ -672,7 +631,7 @@
         return !dangerousPatterns.some(pattern => pattern.test(lower));
     }
 
-    // ======================= 辅助函数 =======================
+    // ======================= 核心替换函数 =======================
     function escapeRegex(str) { return String(str).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
     function unescapeReplacementString(str) {
         if (typeof str !== 'string') return str;
@@ -732,21 +691,30 @@
         } else alert(msg);
     }
 
-    // ======================= 配置快照/存储 =======================
+    // ======================= 配置快照（仅保存规则及全局标志） =======================
     function getCurrentFullConfig() {
         return {
-            top: { regexPattern: regexInput.value, replacement: replacementInput.value, flagG: flagG.checked, flagI: flagI.checked, flagM: flagM.checked, topJsMode: topJsMode.checked, loopUntilStable: loopUntilStable.checked },
+            version: 2,
+            globalFlags: { flagG: flagG.checked, flagI: flagI.checked, flagM: flagM.checked, topJsMode: topJsMode.checked, loopUntilStable: loopUntilStable.checked },
             customRules: customRules.map(r => ({ id: r.id, name: r.name, pattern: r.pattern, replacement: r.replacement, enabled: r.enabled, order: r.order, runChecked: r.runChecked, isRegex: r.isRegex, isJS: r.isJS }))
         };
     }
 
     function applyFullConfig(config, saveSnapshotFlag = true) {
         if (!config) return false;
-        if (config.top) {
-            regexInput.value = config.top.regexPattern || '';
-            replacementInput.value = config.top.replacement || '';
-            flagG.checked = !!config.top.flagG; flagI.checked = !!config.top.flagI; flagM.checked = !!config.top.flagM;
-            topJsMode.checked = !!config.top.topJsMode; loopUntilStable.checked = !!config.top.loopUntilStable;
+        if (config.globalFlags) {
+            flagG.checked = !!config.globalFlags.flagG;
+            flagI.checked = !!config.globalFlags.flagI;
+            flagM.checked = !!config.globalFlags.flagM;
+            topJsMode.checked = !!config.globalFlags.topJsMode;
+            loopUntilStable.checked = !!config.globalFlags.loopUntilStable;
+        } else if (config.top) {
+            // 兼容旧版本配置（忽略正则输入框内容，只保留标志）
+            if (config.top.flagG !== undefined) flagG.checked = !!config.top.flagG;
+            if (config.top.flagI !== undefined) flagI.checked = !!config.top.flagI;
+            if (config.top.flagM !== undefined) flagM.checked = !!config.top.flagM;
+            if (config.top.topJsMode !== undefined) topJsMode.checked = !!config.top.topJsMode;
+            if (config.top.loopUntilStable !== undefined) loopUntilStable.checked = !!config.top.loopUntilStable;
         }
         if (config.customRules && Array.isArray(config.customRules)) {
             customRules = config.customRules.map(r => normalizeRuleFromImport(r));
@@ -756,11 +724,11 @@
         return true;
     }
 
-    function saveCustomRulesToLocal() { try { localStorage.setItem(STORAGE_KEY_RULES, JSON.stringify(customRules.map(r => ({ id: r.id, name: r.name, pattern: r.pattern, replacement: r.replacement, enabled: r.enabled, order: r.order, runChecked: r.runChecked, isRegex: r.isRegex, isJS: r.isJS })))); } catch(e) { showInfoMessage("保存失败:存储限制", true); } }
+    function saveCustomRulesToLocal() { try { localStorage.setItem(STORAGE_KEY_RULES, JSON.stringify(customRules.map(r => ({ id: r.id, name: r.name, pattern: r.pattern, replacement: r.replacement, enabled: r.enabled, order: r.order, runChecked: r.runChecked, isRegex: r.isRegex, isJS: r.isJS })))); } catch(e) { showInfoMessage("保存失败", true); } }
     function saveSnapshotToLocal(config) { try { localStorage.setItem(STORAGE_SNAPSHOT_KEY, JSON.stringify(config)); } catch(e) {} }
     function loadSnapshotFromLocal() { const snap = localStorage.getItem(STORAGE_SNAPSHOT_KEY); if (snap) { try { return JSON.parse(snap); } catch(e){} } return null; }
 
-    // ======================= 规则表核心操作 =======================
+    // ======================= 规则表渲染与操作 =======================
     function reorderRules() { customRules.sort((a, b) => a.order - b.order); customRules.forEach((r, i) => r.order = i + 1); }
     function renderCustomTable() {
         const tbody = document.getElementById('customRuleTbody'); if (!tbody) return;
@@ -777,8 +745,8 @@
             const tdAct = document.createElement('td'); tdAct.className = 'action-buttons';
             const upBtn = document.createElement('button'); upBtn.textContent = '↑'; upBtn.className = 'icon-btn move-up'; upBtn.onclick = () => moveRule(rule.order, -1);
             const downBtn = document.createElement('button'); downBtn.textContent = '↓'; downBtn.className = 'icon-btn move-down'; downBtn.onclick = () => moveRule(rule.order, 1);
-            const topBtn = document.createElement('button'); topBtn.textContent = '顶'; topBtn.className = 'icon-btn top-btn'; topBtn.title = '置顶'; topBtn.onclick = () => moveToTop(rule.id);
-            const bottomBtn = document.createElement('button'); bottomBtn.textContent = '底'; bottomBtn.className = 'icon-btn bottom-btn'; bottomBtn.title = '置底'; bottomBtn.onclick = () => moveToBottom(rule.id);
+            const topBtn = document.createElement('button'); topBtn.textContent = '顶'; topBtn.className = 'icon-btn top-btn'; topBtn.onclick = () => moveToTop(rule.id);
+            const bottomBtn = document.createElement('button'); bottomBtn.textContent = '底'; bottomBtn.className = 'icon-btn bottom-btn'; bottomBtn.onclick = () => moveToBottom(rule.id);
             const delBtn = document.createElement('button'); delBtn.textContent = '删'; delBtn.className = 'icon-btn delete'; delBtn.onclick = () => deleteRuleById(rule.id);
             tdAct.append(upBtn, downBtn, topBtn, bottomBtn, delBtn); tr.appendChild(tdAct);
             tbody.appendChild(tr);
@@ -789,10 +757,10 @@
     function moveToBottom(ruleId) { const idx = customRules.findIndex(r => r.id === ruleId); if (idx === -1 || idx === customRules.length-1) return; const [rule] = customRules.splice(idx, 1); customRules.push(rule); reorderRules(); renderCustomTable(); saveCustomRulesToLocal(); showInfoMessage('已置底'); }
     function deleteRuleById(id) { customRules = customRules.filter(r => r.id !== id); reorderRules(); renderCustomTable(); saveCustomRulesToLocal(); showInfoMessage('规则已删除'); }
     function addRule() { const newId = Date.now(); customRules.push({ id: newId, name: `新规则${customRules.length + 1}`, pattern: '', replacement: '', enabled: true, order: customRules.length + 1, runChecked: true, isRegex: true, isJS: false }); reorderRules(); renderCustomTable(); saveCustomRulesToLocal(); showInfoMessage('已添加新规则'); }
-    function resetDefaultRules() { if (confirm('重置所有规则为增强预设集（基于专业规则库）？当前改动将丢失。')) { customRules = JSON.parse(JSON.stringify(defaultCustomRules)); reorderRules(); renderCustomTable(); saveCustomRulesToLocal(); showInfoMessage('已重置为增强预设规则集'); } }
+    function resetDefaultRules() { if (confirm('重置所有规则为增强预设集？')) { customRules = JSON.parse(JSON.stringify(defaultCustomRules)); reorderRules(); renderCustomTable(); saveCustomRulesToLocal(); showInfoMessage('已重置为增强预设规则集'); } }
     function selectAllRunChecks(checked) { customRules.forEach(r => r.runChecked = checked); renderCustomTable(); saveCustomRulesToLocal(); showInfoMessage(checked ? '已全选' : '已全部取消勾选'); }
 
-    // ======================= 批量运行 & 顶部替换 =======================
+    // ======================= 批量运行 =======================
     function batchRunCheckedRules() {
         let src = sourceTextarea.value;
         if (!src.trim()) return showInfoMessage('源文本为空');
@@ -814,20 +782,7 @@
         showInfoMessage(`批量完成: ${rules.length}条规则中${applied}条生效`);
     }
 
-    function applyRegexAndUpdate(showStats = true) {
-        const src = sourceTextarea.value;
-        if (!src) { resultTextarea.value = ''; resultTextarea.dispatchEvent(new Event('input', { bubbles: true })); if (showStats) showInfoMessage("源文本为空"); return; }
-        const pat = regexInput.value.trim();
-        if (!pat) { resultTextarea.value = src; resultTextarea.dispatchEvent(new Event('input', { bubbles: true })); if (showStats) showInfoMessage("正则表达式为空"); return; }
-        const res = performReplaceCore(src, pat, replacementInput.value, getRegexFlags(), loopUntilStable.checked, topJsMode.checked);
-        if (res.error) { resultTextarea.value = src; showInfoMessage('出错: ' + res.error, true); return; }
-        resultTextarea.value = res.newText;
-        resultTextarea.dispatchEvent(new Event('input', { bubbles: true }));
-        recordCurrentState();
-        if (showStats) showInfoMessage(`✅ ${res.changed ? '已应用替换' + (loopUntilStable.checked ? ' (循环至稳定)' : '') : '未发生改变'}`);
-    }
-
-    // ======================= 撤销重做 =======================
+    // ======================= 撤销/重做 =======================
     let undoStack = [], currentUndoIndex = -1, MAX_UNDO_STACK = 50;
     function pushHistory(s, r) { if (undoStack.length && currentUndoIndex >= 0 && undoStack[currentUndoIndex] && undoStack[currentUndoIndex].source === s && undoStack[currentUndoIndex].result === r) return; if (currentUndoIndex < undoStack.length - 1) undoStack = undoStack.slice(0, currentUndoIndex + 1); undoStack.push({ source: s, result: r }); if (undoStack.length > MAX_UNDO_STACK) undoStack.shift(); currentUndoIndex = undoStack.length - 1; }
     function recordCurrentState() { pushHistory(sourceTextarea.value, resultTextarea.value); }
@@ -845,16 +800,13 @@
     function navigateMatch(direction) { if (searchMatches.length === 0) { updateSearchMatches(true); if (!searchMatches.length) return; } let newIdx = currentMatchIndex + direction; if (newIdx < 0) newIdx = searchMatches.length - 1; else if (newIdx >= searchMatches.length) newIdx = 0; highlightMatch(newIdx, true); }
     function clearSearch() { resultSearchInput.value = ''; searchMatches = []; currentMatchIndex = -1; updateSearchCountDisplay(); clearResultSelection(); resultSearchInput.focus(); }
 
-    // ======================= 事件绑定与初始化 =======================
+    // ======================= 事件绑定 =======================
     function bindEvents() {
-        applyRegexBtn.addEventListener('click', () => { recordCurrentState(); applyRegexAndUpdate(true); });
-        loadPresetBtn.addEventListener('click', () => { const sel = presetSelect.value; const p = { del_ads: { pattern: "^.*(版主提醒|版主评語|欢迎来到|阅读文章|您的留言|认真回复|作者：|发表于：|首发：|字数：|待续).*$", replacement: "" }, del_ticket: { pattern: "[([{（［｛【][^\\](){}）］｝】]*?(?:求\\w{0,4}[订推藏]|推荐|码字|月票|打赏)[^\\](){}）］｝】]*?[\\]\\}\\)）］｝】]", replacement: "" }, del_daixu: { pattern: "[（(][^）)]*待续[^）)]*[）)]", replacement: "" }, merge_internal: { pattern: "([^ \\t\\n\\r])\\r?\\n([^ \\t\\n\\r])", replacement: "$1$2" }, compress_empty: { pattern: "\\n\\s*\\n", replacement: "\n" }, del_blank_lines: { pattern: "^\\s*$\\r?\\n?", replacement: "" }, clean_brackets: { pattern: "[\\[\\{（【][^\\]\\}）】]*?(?:待续|求\\w{0,4}[订推藏]|推荐)\\s*[\\]\\}）】]", replacement: "" } }[sel]; if (p) { regexInput.value = p.pattern; replacementInput.value = p.replacement; flagG.checked = true; flagI.checked = false; flagM.checked = (sel === 'del_ads' || sel === 'compress_empty' || sel === 'del_blank_lines'); topJsMode.checked = false; showInfoMessage(`已载入预设：${sel}`); } else showInfoMessage("请选择一个预设规则"); });
-        resetToDefaultBtn.addEventListener('click', () => { regexInput.value = "^.*(版主提醒|版主评語|欢迎来到|阅读文章|您的留言|认真回复|作者：|发表于：|首发：|字数：|待续).*$"; replacementInput.value = ""; flagG.checked = true; flagI.checked = false; flagM.checked = true; topJsMode.checked = false; showInfoMessage("已恢复默认广告行删除规则"); applyRegexAndUpdate(true); });
-        importBtn.addEventListener('click', () => { const i = document.createElement('input'); i.type = 'file'; i.accept = '.txt,.text/plain'; i.onchange = e => { const f = e.target.files[0]; if (f) { const r = new FileReader(); r.onload = ev => { sourceTextarea.value = ev.target.result; showInfoMessage(`已导入: ${f.name}`); applyRegexAndUpdate(false); }; r.readAsText(f, 'UTF-8'); } }; i.click(); });
+        importBtn.addEventListener('click', () => { const i = document.createElement('input'); i.type = 'file'; i.accept = '.txt,.text/plain'; i.onchange = e => { const f = e.target.files[0]; if (f) { const r = new FileReader(); r.onload = ev => { sourceTextarea.value = ev.target.result; showInfoMessage(`已导入: ${f.name}`); }; r.readAsText(f, 'UTF-8'); } }; i.click(); });
         exportBtn.addEventListener('click', () => { const content = resultTextarea.value; if (!content) return alert("结果为空"); const b = new Blob([content], { type: 'text/plain;charset=utf-8' }); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'textpro_output.txt'; a.click(); URL.revokeObjectURL(a.href); showInfoMessage("导出成功"); });
         copySourceBtn.addEventListener('click', () => { navigator.clipboard?.writeText(sourceTextarea.value); showInfoMessage("源文本已复制"); });
         copyResultBtn.addEventListener('click', () => { navigator.clipboard?.writeText(resultTextarea.value); showInfoMessage("结果文本已复制"); });
-        clearAllBtn.addEventListener('click', () => { sourceTextarea.value = ''; resultTextarea.value = ''; regexInput.value = ''; replacementInput.value = ''; resultTextarea.dispatchEvent(new Event('input', { bubbles: true })); showInfoMessage("已清空所有文本和正则"); });
+        clearAllBtn.addEventListener('click', () => { sourceTextarea.value = ''; resultTextarea.value = ''; resultTextarea.dispatchEvent(new Event('input', { bubbles: true })); showInfoMessage("已清空所有文本"); });
         statsBtn.addEventListener('click', () => { alert(`📊 统计\n源文本: ${sourceTextarea.value.split(/\r?\n/).length}行, ${sourceTextarea.value.length}字符\n结果文本: ${resultTextarea.value.split(/\r?\n/).length}行, ${resultTextarea.value.length}字符`); });
         undoBtn.addEventListener('click', undo); redoBtn.addEventListener('click', redo);
         addRuleBtn.addEventListener('click', () => { recordCurrentState(); addRule(); });
@@ -863,7 +815,7 @@
         selectAllRulesBtn.addEventListener('click', () => selectAllRunChecks(true));
         deselectAllRulesBtn.addEventListener('click', () => selectAllRunChecks(false));
         exportFullConfigBtn.addEventListener('click', () => { const config = getCurrentFullConfig(); const dataStr = JSON.stringify(config, null, 2); const blob = new Blob([dataStr], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'textpro_workspace_config.json'; a.click(); URL.revokeObjectURL(a.href); showInfoMessage('完整配置已导出'); });
-        importFullConfigBtn.addEventListener('click', () => { const input = document.createElement('input'); input.type = 'file'; input.accept = '.json'; input.onchange = e => { if (e.target.files[0]) { const reader = new FileReader(); reader.onload = ev => { try { const cfg = JSON.parse(ev.target.result); if (cfg && (cfg.top || cfg.customRules)) { if (confirm("导入配置将覆盖当前所有规则及顶部设置，且可能包含JS代码，是否继续？")) { applyFullConfig(cfg, true); showInfoMessage('配置导入成功'); } } else throw new Error(); } catch (err) { alert('配置文件无效'); } }; reader.readAsText(e.target.files[0]); } }; input.click(); });
+        importFullConfigBtn.addEventListener('click', () => { const input = document.createElement('input'); input.type = 'file'; input.accept = '.json'; input.onchange = e => { if (e.target.files[0]) { const reader = new FileReader(); reader.onload = ev => { try { const cfg = JSON.parse(ev.target.result); if (cfg && (cfg.customRules || cfg.globalFlags || cfg.top)) { if (confirm("导入配置将覆盖当前所有规则及标志设置，是否继续？")) { applyFullConfig(cfg, true); showInfoMessage('配置导入成功'); } } else throw new Error(); } catch (err) { alert('配置文件无效'); } }; reader.readAsText(e.target.files[0]); } }; input.click(); });
         saveSnapshotBtn.addEventListener('click', () => { saveSnapshotToLocal(getCurrentFullConfig()); showInfoMessage('当前工作区配置已保存为快照'); });
         sourceTextarea.addEventListener('input', () => { setTimeout(recordCurrentState, 300); });
         resultTextarea.addEventListener('input', () => { if (resultSearchInput.value.trim() !== '') updateSearchMatches(false); else clearSearch(); });
@@ -875,14 +827,15 @@
         sourceTextarea.addEventListener('scroll', () => { const ratio = sourceTextarea.scrollTop / (sourceTextarea.scrollHeight - sourceTextarea.clientHeight); if (!isNaN(ratio)) resultTextarea.scrollTop = ratio * (resultTextarea.scrollHeight - resultTextarea.clientHeight); });
     }
 
-    // 初始化：完全清空自定义替换表（不加载任何历史规则，也不自动恢复快照）
+    // 初始化
     customRules = [];
     renderCustomTable();
-    saveCustomRulesToLocal();   // 确保存储为空
-    // 不自动应用快照、不自动加载localStorage规则，实现纯净空白规则表。所有规则都依赖于导入配置或重置默认规则。
+    saveCustomRulesToLocal();
+    const snapshot = loadSnapshotFromLocal();
+    if (snapshot) { applyFullConfig(snapshot, false); showInfoMessage('已加载上次工作区快照'); }
     bindEvents();
     recordCurrentState();
-    showInfoMessage("自定义替换表已清空，可导入配置或添加规则。");
+    showInfoMessage("工具已准备就绪，使用下方规则表批量净化文本。");
 })();
 </script>
 </body>
