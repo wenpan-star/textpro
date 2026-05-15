@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>TextPro 文本净化工具 V8.0.2 · 安全增强版 · 搜索优化</title>
+    <title>TextPro 文本净化工具 V8.1.0 · 搜索焦点修复</title>
     <style>
         * {
             box-sizing: border-box;
@@ -67,7 +67,6 @@
             resize: vertical;
             transition: border 0.2s, box-shadow 0.2s;
         }
-        /* 高亮搜索词：选中文本的背景改为醒目的亮黄色 */
         textarea::selection {
             background: #ffeb3b !important;
             color: #000 !important;
@@ -89,8 +88,6 @@
             min-height: 320px;
             background: #fefcf5;
         }
-
-        /* 搜索栏 */
         .search-bar {
             display: flex;
             flex-wrap: wrap;
@@ -132,8 +129,6 @@
         }
         .search-count.no-match { background: #ffeaea; color: #b91c1c; }
         .search-count.has-match { background: #e6f4ea; color: #166534; }
-
-        /* 全局控制栏 */
         .global-control-bar {
             display: flex;
             flex-wrap: wrap;
@@ -168,7 +163,6 @@
             padding: 6px 18px;
             border-radius: 40px;
         }
-        /* 快速替换栏 */
         .quick-replace-bar {
             background: #fefce8;
             border: 1px solid #fde047;
@@ -213,7 +207,6 @@
         .quick-replace-bar button:hover {
             background: #ca8a04;
         }
-
         button {
             background: #1f5e7e;
             border: none;
@@ -264,7 +257,6 @@
             border-radius: 60px;
             font-size: 0.7rem;
         }
-        /* 规则表格 */
         .rule-table {
             width: 100%;
             border-collapse: collapse;
@@ -285,7 +277,6 @@
             font-weight: 600;
             font-size: 13px;
         }
-        /* 列宽优化 */
         .rule-table th:nth-child(1) { width: 48px; }
         .rule-table th:nth-child(2) { width: 48px; }
         .rule-table th:nth-child(3) { width: 60px; }
@@ -294,7 +285,6 @@
         .rule-table th:nth-child(6) { width: 28%; min-width: 200px; }
         .rule-table th:nth-child(7) { width: 26%; min-width: 180px; }
         .rule-table th:nth-child(8) { width: 170px; }
-
         .rule-table td:nth-child(5) input,
         .rule-table td:nth-child(6) input,
         .rule-table td:nth-child(7) input {
@@ -350,7 +340,6 @@
             flex-wrap: wrap;
             gap: 12px;
         }
-        /* 可折叠帮助区 */
         .help-section {
             margin-top: 16px;
             border-top: 1px solid #e2e8f0;
@@ -376,7 +365,6 @@
         .help-content.show {
             display: block;
         }
-        /* 安全选项 */
         .safety-option {
             margin-left: auto;
             display: flex;
@@ -407,7 +395,6 @@
             margin-left: 8px;
             cursor: help;
         }
-        /* 闪烁动画 */
         @keyframes flashYellow {
             0% { background-color: #fff9c4; }
             100% { background-color: #fefcf5; }
@@ -419,7 +406,6 @@
 </head>
 <body>
 <div class="app-container">
-    <!-- 卡片1：源文本 / 结果文本 -->
     <div class="card">
         <div class="card-header">
             <span>🧹 TextPro 文本净化工具 · 安全增强版 <span class="warning-badge" title="JS模式可执行自定义代码，请仅使用可信规则">⚠️ JS模式高危</span></span>
@@ -460,7 +446,6 @@
         </div>
     </div>
 
-    <!-- 卡片2：快速替换栏（临时执行，不影响规则表） -->
     <div class="card">
         <div class="card-header">
             <span>⚡ 快速替换（临时）</span>
@@ -490,7 +475,6 @@
         </div>
     </div>
 
-    <!-- 卡片3：自定义替换表 -->
     <div class="card">
         <div class="card-header">
             <span>📋 自定义替换表（顺序批量运行）</span>
@@ -563,7 +547,6 @@
     const flagM = document.getElementById('flagM');
     const loopUntilStable = document.getElementById('loopUntilStable');
     const autoLoadSnapshot = document.getElementById('autoLoadSnapshotCheck');
-    // 快速替换元素
     const quickPattern = document.getElementById('quickPattern');
     const quickReplacement = document.getElementById('quickReplacement');
     const quickG = document.getElementById('quickG');
@@ -589,7 +572,6 @@
     const selectAllRulesBtn = document.getElementById('selectAllRulesBtn');
     const deselectAllRulesBtn = document.getElementById('deselectAllRulesBtn');
     
-    // 搜索
     let resultSearchInput = document.getElementById('resultSearchInput');
     const resultSearchCase = document.getElementById('resultSearchCase');
     const resultSearchPrev = document.getElementById('resultSearchPrev');
@@ -602,12 +584,11 @@
     const STORAGE_SNAPSHOT_KEY = 'textpro_full_workspace_v8';
     const STORAGE_AUTO_LOAD = 'textpro_auto_load_snapshot';
 
-    // 加载自动快照偏好
     try {
         autoLoadSnapshot.checked = localStorage.getItem(STORAGE_AUTO_LOAD) === 'true';
     } catch(e) {}
 
-    // ======================= 超强安全检测 =======================
+    // ======================= 安全检测 =======================
     function isJSCodeSafe(code) {
         if (!code) return true;
         const lower = code.toLowerCase();
@@ -752,7 +733,6 @@
         reorderRules(); tbody.innerHTML = '';
         customRules.forEach(rule => {
             const tr = document.createElement('tr');
-            // 各单元格构建 (完整保留)
             const tdRun = document.createElement('td'); const runChk = document.createElement('input'); runChk.type = 'checkbox'; runChk.checked = rule.runChecked; runChk.addEventListener('change', e => { rule.runChecked = e.target.checked; saveCustomRulesToLocal(); }); tdRun.appendChild(runChk); tr.appendChild(tdRun);
             const tdRegex = document.createElement('td'); const regexChk = document.createElement('input'); regexChk.type = 'checkbox'; regexChk.checked = rule.isRegex; regexChk.addEventListener('change', e => { rule.isRegex = e.target.checked; saveCustomRulesToLocal(); }); tdRegex.appendChild(regexChk); tr.appendChild(tdRegex);
             const tdJs = document.createElement('td'); const jsChk = document.createElement('input'); jsChk.type = 'checkbox'; jsChk.checked = !!rule.isJS; jsChk.addEventListener('change', e => { rule.isJS = e.target.checked; saveCustomRulesToLocal(); }); tdJs.appendChild(jsChk); tr.appendChild(tdJs);
@@ -778,7 +758,6 @@
     function resetDefaultRules() { if (confirm('重置为默认规则集？')) { customRules = JSON.parse(JSON.stringify(defaultCustomRules)); reorderRules(); renderCustomTable(); saveCustomRulesToLocal(); showInfoMessage('已重置'); } }
     function selectAllRunChecks(checked) { customRules.forEach(r => r.runChecked = checked); renderCustomTable(); saveCustomRulesToLocal(); showInfoMessage(checked ? '全选' : '取消全选'); }
 
-    // 批量运行（跳过错误继续）
     function batchRunCheckedRules() {
         let src = sourceTextarea.value;
         if (!src.trim()) return showInfoMessage('源文本为空');
@@ -802,7 +781,6 @@
         else showInfoMessage(`批量完成，共应用 ${rules.length} 条规则`);
     }
 
-    // 快速替换
     function quickReplace() {
         let src = resultTextarea.value;
         if (!src && sourceTextarea.value) src = sourceTextarea.value;
@@ -820,17 +798,15 @@
         showInfoMessage('快速替换完成');
     }
 
-    // 撤销重做逻辑
     let undoStack = [], currentUndoIndex = -1;
     function pushHistory(s, r) { if (undoStack.length && currentUndoIndex>=0 && undoStack[currentUndoIndex].source===s && undoStack[currentUndoIndex].result===r) return; if (currentUndoIndex < undoStack.length-1) undoStack = undoStack.slice(0, currentUndoIndex+1); undoStack.push({ source: s, result: r }); if (undoStack.length > 50) undoStack.shift(); currentUndoIndex = undoStack.length-1; }
     function recordCurrentState() { pushHistory(sourceTextarea.value, resultTextarea.value); }
     function undo() { if (currentUndoIndex <=0) return showInfoMessage("无历史"); currentUndoIndex--; const st = undoStack[currentUndoIndex]; if(st){ sourceTextarea.value = st.source; resultTextarea.value = st.result; resultTextarea.dispatchEvent(new Event('input',{bubbles:true})); showInfoMessage("已撤销"); } }
     function redo() { if (currentUndoIndex >= undoStack.length-1) return showInfoMessage("无重做"); currentUndoIndex++; const st = undoStack[currentUndoIndex]; if(st){ sourceTextarea.value = st.source; resultTextarea.value = st.result; resultTextarea.dispatchEvent(new Event('input',{bubbles:true})); showInfoMessage("已重做"); } }
 
-    // ======================= 搜索高亮（增强版：彻底修复回车 + 高亮闪烁） =======================
+    // ======================= 搜索高亮（修复焦点问题） =======================
     let searchMatches = [], currentMatchIndex = -1;
     
-    // 精确滚动到光标位置（辅助函数）
     function scrollToCaretInTextarea(textarea, caretPos) {
         if (!textarea || caretPos === undefined) return;
         const div = document.createElement('div');
@@ -844,7 +820,6 @@
         document.body.removeChild(div);
     }
     
-    // 闪烁结果框背景，提示高亮位置
     function flashResultBackground() {
         resultTextarea.classList.add('flash-highlight');
         setTimeout(() => {
@@ -881,15 +856,18 @@
         }
     }
     
+    // 关键修复：focusResult 为 false 时不聚焦结果框，避免输入时焦点丢失
     function highlightMatch(index, focusResult = false) {
         if (index < 0 || index >= searchMatches.length) return;
         const match = searchMatches[index];
         currentMatchIndex = index;
-        resultTextarea.focus();
+        if (focusResult) {
+            resultTextarea.focus();
+        }
         resultTextarea.setSelectionRange(match.start, match.end);
         if (focusResult) {
             scrollToCaretInTextarea(resultTextarea, match.start);
-            flashResultBackground();  // 闪烁提示
+            flashResultBackground();
         }
         updateSearchCountDisplay();
     }
@@ -925,19 +903,22 @@
         resultSearchInput.focus();
     }
     
-    // 重新绑定搜索框事件（彻底解决回车换行问题）
     function rebindSearchEvents() {
-        // 替换输入框为全新元素，移除所有旧事件
         const oldInput = resultSearchInput;
         const newInput = document.createElement('input');
         newInput.type = 'text';
         newInput.id = 'resultSearchInput';
         newInput.placeholder = '🔍 搜索处理结果...';
         newInput.value = oldInput.value;
+        
+        const wasFocused = document.activeElement === oldInput;
         oldInput.parentNode.replaceChild(newInput, oldInput);
         resultSearchInput = newInput;
         
-        // 绑定新事件
+        if (wasFocused) {
+            newInput.focus();
+        }
+        
         resultSearchInput.addEventListener('input', () => updateSearchMatches(true));
         resultSearchInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
@@ -960,14 +941,12 @@
             }
         });
         
-        // 确保按钮事件依然有效
         resultSearchPrev.onclick = () => navigateMatch(-1);
         resultSearchNext.onclick = () => navigateMatch(1);
         resultSearchClear.onclick = clearSearch;
         resultSearchCase.onchange = () => updateSearchMatches(true);
     }
 
-    // ======================= 事件绑定 =======================
     function bindEvents() {
         importBtn.onclick = () => { let i=document.createElement('input'); i.type='file'; i.accept='.txt'; i.onchange=e=>{ let f=e.target.files[0]; if(f){ let r=new FileReader(); r.onload=ev=>{ sourceTextarea.value=ev.target.result; showInfoMessage(`已导入 ${f.name}`); }; r.readAsText(f,'UTF-8'); } }; i.click(); };
         exportBtn.onclick = () => { let content=resultTextarea.value; if(!content) return alert('结果为空'); let blob=new Blob([content],{type:'text/plain'}); let a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='textpro_output.txt'; a.click(); URL.revokeObjectURL(a.href); };
@@ -990,11 +969,9 @@
         autoLoadSnapshot.addEventListener('change', () => localStorage.setItem(STORAGE_AUTO_LOAD, autoLoadSnapshot.checked));
         document.getElementById('helpToggle').onclick = () => document.getElementById('helpContent').classList.toggle('show');
         
-        // 重新绑定搜索事件（修复回车 + 高亮）
         rebindSearchEvents();
     }
 
-    // 初始化
     customRules = [];
     renderCustomTable();
     saveCustomRulesToLocal();
@@ -1006,7 +983,7 @@
     }
     bindEvents();
     recordCurrentState();
-    showInfoMessage('已升级至 V8.0.2 — 搜索功能优化（回车导航 + 高亮闪烁）');
+    showInfoMessage('V8.0.3 — 搜索框焦点已修复，可连续输入中文，按回车跳转匹配');
 })();
 </script>
 </body>
